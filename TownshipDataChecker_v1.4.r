@@ -12,7 +12,7 @@
 # town <- read.table("Massac_14S_4E_Export.csv", header = TRUE, sep = ",", na.strings = "NULL")
 # township.name = "Massac 14S 4E"
 
-#  Jill Deines, December 5, 2012klsdkfajkljsdfkl
+#  Jill Deines, December 5, 2012
 
 #  updates needed:
 # don't flag bearing entries that are entered using "cardinal direction" protocol
@@ -78,8 +78,8 @@ R.checker.version <- "Version 1.4"
 #  and saving this file).  I used read.table to deal with MySQL using "NULL" 
 
 #  ## WILL NEED TO CHANGE FILE NAME FOR YOUR TOWNSHIP ##
-town <- read.table("Johnson_12S_03E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
-township.name <- "Johnson 12S 03E"
+town <- read.table("Dupage_38N_11E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
+township.name <- "Dupage 38N 11E"
 
 
 
