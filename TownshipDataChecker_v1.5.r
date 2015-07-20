@@ -12,7 +12,7 @@
 # town <- read.table("Massac_14S_4E_Export.csv", header = TRUE, sep = ",", na.strings = "NULL")
 # township.name = "Massac 14S 4E"
 
-#  Jill Deines, December 5, 2012klsdkfajkljsdfkl
+#  Jill Deines, December 5, 2012
 
 #  updates needed:
 # don't flag bearing entries that are entered using "cardinal direction" protocol
@@ -37,6 +37,12 @@
 # and included tons of NAs)
 
 # Angharad Hamlin and Jody Peters, October 28, 2014
+
+# Version 1.5 updates
+
+# Jody added large.diameters, large.degrees, illegible.missing and verbatim.trees as things to check at the end of the Output pdf file
+
+# Jody Peters, July 16, 2015
 
 
 
@@ -68,7 +74,7 @@ rm(list=ls(all=TRUE))
 
 
 # insert version number into report
-R.checker.version <- "Version 1.4"
+R.checker.version <- "Version 1.5"
 
 
 
@@ -78,8 +84,8 @@ R.checker.version <- "Version 1.4"
 #  and saving this file).  I used read.table to deal with MySQL using "NULL" 
 
 #  ## WILL NEED TO CHANGE FILE NAME FOR YOUR TOWNSHIP ##
-town <- read.table("Johnson_12S_03E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
-township.name <- "Johnson 12S 03E"
+town <- read.table("Randolph_04S_08W_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
+township.name <- "Randolph 04S 08W"
 
 
 
@@ -851,7 +857,11 @@ output <- list(metadata = metadata,
                decimals.in.links = decimal.links,
                recheck = if(exists('recheck')) recheck else "none",
                rare.species = "scan for rare species and make sure they match verbatim (vs dropdown list error) - Done?",
-               township.range = "make sure all township/range numbers have two digits (ie, 02) - Done? "
+               township.range = "make sure all township/range numbers have two digits (ie, 02) - Done? ",
+               large.diameters = "check any diameters over 60 inches. add note to fixed column that you checked it - Done?",
+               large.degrees = "check that there are no degrees over 90, add note to fixed column if they are actually over 90 - Done?",
+               illegible.missing = "search for entries with 88888s or 99999s. make sure there are notes in fixed column explaining these entries - Done?",
+               verbatim.trees = "sort by verbatim trees and check for weird names (e.g., Di which should be Do or one post oaks with lots of pin oaks, etc.) - Done?"
 )
 
 
