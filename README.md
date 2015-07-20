@@ -14,3 +14,4 @@ This is R code used by ND as a first check of Indiana and Illinois PLS data ente
 10. check for duplicate entries via refcorner, chains, traveldir and typecorner
 11. check that the type of corner (section, quartersection, township) matches the cornerID
 12. create list of entries that data enterers request to have rechecked by someone else
+13. check for errors in the diameter, degrees, and verbatim trees and make sure there is a good description for why 88888s or 99999s were entered
