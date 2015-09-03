@@ -78,7 +78,7 @@ rm(list=ls(all=TRUE))
 
 
 # insert version number into report
-R.checker.version <- "Version 1.5"
+R.checker.version <- "Version 1.6"
 
 
 
