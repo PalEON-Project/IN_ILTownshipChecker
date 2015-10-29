@@ -1,5 +1,4 @@
 ## Version 1.4 ##
-
 #  This script is an automated data checker for Notre Dame PLS data.  It should be run on
 #  completed townships by exporting that township from MySQL to a csv.  The data checker will
 #  flag logical data entry errors for further investigation by humans.
@@ -11,7 +10,6 @@
 #  These are preserved for future confirmation of working code if necessary.
 # town <- read.table("Massac_14S_4E_Export.csv", header = TRUE, sep = ",", na.strings = "NULL")
 # township.name = "Massac 14S 4E"
-
 #  Jill Deines, December 5, 2012
 
 #  updates needed:
@@ -20,35 +18,33 @@
 # I'm sure there are others...
 
 # Verison 1.3 updates
-
 # Added logic tests to check that corner IDs match section numbers for both sections and quarter sections. Uses dplyr library to 
 # join tables of possible section numbers to the township data. This package will need to be downloaded in order for the code to
 # work.
-
 # Angharad Hamlin and Jody Peters, May 9, 2014
 
 # Verison 1.4 updates
-
 # 1) Changed the check for looking for decimals in chainstree columns. In the previous 1.3 version the R checker looked for any decimals (code starts on line 431). 
 # Now we are looking for any decimals that are not 0, 0.25, 0.5 and 0.75.  These decimal values are okay because they have become commonly entered by the surveyors.
 # 2) Also changed TypeCorner Checks.  It had been giving errors, so have corrected the errors.  The Output no longer lists the typecorner.cornerid.mismatch error, 
 # instead it is labeled as SectionCheck and will tell if the error is for the Section, Quarter Section, or Township, what the cornerID is and what the entryID is.
 # 3) Added code to the Section.Combo and QSection.Combo that takes out all the rows which have NAs in the cornerid column (previously the output was super long 
 # and included tons of NAs)
-
 # Angharad Hamlin and Jody Peters, October 28, 2014
 
 # Version 1.5 updates
-
 # Jody added large.diameters, large.degrees, illegible.missing and verbatim.trees as things to check at the end of the Output pdf file
-
 # Jody Peters, July 16, 2015
 
 # Version 1.6 updates
-
 # Jody added no.data, no.trees and water.wet to things for the R checkers to look at during the R check.
-
 # Jody Peters, August 7, 2015
+
+#version 1.6 updates
+#Jody removed uneccesary questions in the output - check to make sure township range match (we select by township range in MySQL so it will only pull matching entries),
+#scan for rare species (this is covered in the verbatim tree check)
+#Jody Peters, October 29, 2015
+
 
 ##  SET WORKING DIRECTORY to tell R where to look for the csv files.  Only run the line below
 #  that applies to the computer you are working on (or add your own).  The file path should
@@ -88,8 +84,8 @@ R.checker.version <- "Version 1.6"
 #  and saving this file).  I used read.table to deal with MySQL using "NULL" 
 
 #  ## WILL NEED TO CHANGE FILE NAME FOR YOUR TOWNSHIP ##
-town <- read.table("Lagrange_36N_10E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
-township.name <- "Lagrange 36N 10E"
+town <- read.table("Crawford_04S_01E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
+township.name <- "Crawford_04S_01E"
 
 
 
@@ -860,12 +856,10 @@ output <- list(metadata = metadata,
                tree.location.4 = if(exists('tree.location.4')) tree.location.4 else "none",
                decimals.in.links = decimal.links,
                recheck = if(exists('recheck')) recheck else "none",
-               rare.species = "scan for rare species and make sure they match verbatim (vs dropdown list error) - Done?",
-               township.range = "make sure all township/range numbers have two digits (ie, 02) - Done? ",
+               verbatim.trees = "sort by verbatim trees and check for weird names (e.g., Di which should be Do or one post oaks with lots of pin oaks, etc.) - Done?",
                large.diameters = "check any diameters over 60 inches. add note to fixed column that you checked it - Done?",
                large.degrees = "check that there are no degrees over 90, add note to fixed column if they are actually over 90 - Done?",
                illegible.missing = "search for entries with 88888s or 99999s. make sure there are notes in fixed column explaining these entries - Done?",
-               verbatim.trees = "sort by verbatim trees and check for weird names (e.g., Di which should be Do or one post oaks with lots of pin oaks, etc.) - Done?",
                no.data = "check that there is a description of why there is no data (e.g., page missing, indian territory, etc)",
                no.tree = "check corners marked no tress has include details about condition of corner (e.g., post in mound, post, etc)",
                water.wet = "check corners marked as water or wet that there is a description for why it has water or is wet (e.g., pond, swamp, marsh, etc)"
