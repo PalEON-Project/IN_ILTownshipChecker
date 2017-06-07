@@ -52,8 +52,8 @@
 #  setwd("C:/Dropbox/PalEON Lab Team/Township Data Checks")  #lab GIS computer
 #  setwd("C:/Users/jmurray7/Dropbox/PalEON Lab Team/Township Data Checks")  # Jody's work computer
 #  setwd("/Users/paleolab/Dropbox/PalEON Lab Team/Township Data Checks")  #lab MAC
-#  setwd("C:/Users/paleolab/Dropbox/PalEON Lab Team/Township Data Checks") #middle comp and laptop
-
+#  setwd("C:/Users/paleolab/Dropbox/PalEON Lab Team/Township Data Checks") #middle comp and laptop (also good for sceptre)
+#  setwd("C:/Users/paleolab/Dropbox/PalEON Lab Team/Township Data Checks") #laptop double screen comp
 
 
 
@@ -69,14 +69,8 @@
 rm(list=ls(all=TRUE)) 
 
 
-
-
-
-
 # insert version number into report
 R.checker.version <- "Version 1.6"
-
-
 
 
 
@@ -84,8 +78,8 @@ R.checker.version <- "Version 1.6"
 #  and saving this file).  I used read.table to deal with MySQL using "NULL" 
 
 #  ## WILL NEED TO CHANGE FILE NAME FOR YOUR TOWNSHIP ##
-town <- read.table("Crawford_04S_01E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
-township.name <- "Crawford_04S_01E"
+town <- read.table("LaGrange_36N_08E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
+township.name <- "LaGrange_36N_08E"
 
 
 
@@ -854,14 +848,14 @@ output <- list(metadata = metadata,
                tree.location.2 = if(exists('tree.location.2')) tree.location.2 else "none",
                tree.location.3 = if(exists('tree.location.3')) tree.location.3 else "none",
                tree.location.4 = if(exists('tree.location.4')) tree.location.4 else "none",
-               decimals.in.links = decimal.links,
+               #decimals.in.links = decimal.links,
                recheck = if(exists('recheck')) recheck else "none",
                verbatim.trees = "sort by verbatim trees and check for weird names (e.g., Di which should be Do or one post oaks with lots of pin oaks, etc.) - Done?",
                large.diameters = "check any diameters over 60 inches. add note to fixed column that you checked it - Done?",
                large.degrees = "check that there are no degrees over 90, add note to fixed column if they are actually over 90 - Done?",
                illegible.missing = "search for entries with 88888s or 99999s. make sure there are notes in fixed column explaining these entries - Done?",
                no.data = "check that there is a description of why there is no data (e.g., page missing, indian territory, etc)",
-               no.tree = "check corners marked no tress has include details about condition of corner (e.g., post in mound, post, etc)",
+               no.tree = "check corners marked no trees has include details about condition of corner (e.g., post in mound, post, etc)",
                water.wet = "check corners marked as water or wet that there is a description for why it has water or is wet (e.g., pond, swamp, marsh, etc)"
 )
 
