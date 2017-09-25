@@ -45,6 +45,15 @@
 #scan for rare species (this is covered in the verbatim tree check)
 #Jody Peters, October 29, 2015
 
+#version 1.7 updates
+#We switched from entering data with our GLO webform and storing the data in MySQL 
+#to entering and storing data with qualtrics.nd.edu Project GLO.
+#Jody updated the code to be able to take the checked Qualtrics entries saved as csvs and
+#run these double checks
+#CHECKS TO ADD - 1) ALL TRP LISTED ARE CORRECT
+#2) DUPLICATE TREE INFO WITHIN CORNER AND ACROSS TOWNSHIP
+
+
 
 ##  SET WORKING DIRECTORY to tell R where to look for the csv files.  Only run the line below
 #  that applies to the computer you are working on (or add your own).  The file path should
@@ -70,7 +79,7 @@ rm(list=ls(all=TRUE))
 
 
 # insert version number into report
-R.checker.version <- "Version 1.6"
+R.checker.version <- "Version 1.7"
 
 
 
@@ -78,8 +87,8 @@ R.checker.version <- "Version 1.6"
 #  and saving this file).  I used read.table to deal with MySQL using "NULL" 
 
 #  ## WILL NEED TO CHANGE FILE NAME FOR YOUR TOWNSHIP ##
-town <- read.table("LaGrange_36N_08E_Export.csv", header = TRUE, sep=",", na.strings = "NULL")
-township.name <- "LaGrange_36N_08E"
+town <- read.table("5S7E3_Hamilton_Checked.csv", header = TRUE, sep=",", na.strings = "NULL", stringsAsFactors = FALSE)
+township.name <- "5S7E3_Hamilton"
 
 
 
