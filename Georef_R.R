@@ -2,7 +2,7 @@
 ######## Georeferencing MySQL Data #########
 ############################################
 
-#created by Jody Peters
+#created by Jody Peters summer 2017
 
 setwd("C:/Users/jmurray7/Dropbox/GIS PalEON/Section Georeferencing")
 rm(list=ls())
