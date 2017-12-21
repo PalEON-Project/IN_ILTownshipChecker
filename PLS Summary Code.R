@@ -17,6 +17,7 @@
 #6. check for duplicate x/y points and entryids
 #7. check that there are entries for all state, surveyor, year, county 
 #8. check that Water/Wet entries have no trees entered
+#9. check that the TRPs listed in the data file are the same ones listed in the GIS layers
 
 
 #extra code in case you want to find a row with specific value in a column
@@ -44,6 +45,13 @@ newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
 nontreestate <- state[(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
 #ILv1.8-1: nontreeIL = 29003, newIL = 28308, IL = 57311. They match!
 #INv1.7: nontreeIN = 7602, newIN = 49463, IN = 57065. They match!
+
+#get a table of the counts of water, wet, no tree and no data
+library(dplyr)
+nontreecounts = state %>% group_by(L3_tree1) %>% tally()
+View(nontreecounts)
+#In IN v1.7: 689 No data, 5595 No tree, 1295 Water and 23 Wet entries
+
 
 #sort newIL by trees to make sure all entries have trees in tree1 column
 #sort ascending
@@ -206,7 +214,7 @@ length(uniquecount) == length(uniquetemporary$masteruniquetree) #needs to say TR
 uniquedups <-uniquetemporary[duplicated(uniquetemporary$masteruniquetree)|duplicated(uniquetemporary$masteruniquetree, fromLast=TRUE),]
 uniquedups2 = uniquedups[order(uniquedups$masteruniquetree),] 
 write.csv(uniquedups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/uniquetree_duplicates_v1.8-1_2.csv", row.names = FALSE)
-write.csv(uniquedups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/uniquetree_duplicates_vIN1.7_take2.csv", row.names = FALSE)
+write.csv(uniquedups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/uniquetree_duplicates_vIN1.7_take3.csv", row.names = FALSE)
 
 
 #############################################
@@ -218,18 +226,18 @@ library(plyr)
 L1tree1.species <- ddply(newstate, .(newstate$species, newstate$L1_tree1), nrow)
 L1tree1.species
 write.csv(L1tree2.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree1-species.csv", row.names = FALSE)
-write.csv(L1tree1.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree-species.csv", row.names = FALSE)
+write.csv(L1tree1.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree-species_take2.csv", row.names = FALSE)
 #check L1_tree1 and species1 that do not match
-trees[which(trees$L1_tree1 == "blue ash"),]
+newstate[which(newstate$L1_tree1 == "blue ash"),]
 
 
 #TREE2
 L1tree2.species <- ddply(newstate, .(newstate$species2, newstate$L1_tree2), nrow)
 L1tree2.species
 write.csv(L1tree2.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree2-species.csv", row.names = FALSE)
-write.csv(L1tree2.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L2tree-species.csv", row.names = FALSE)
+write.csv(L1tree2.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L2tree-species_take2.csv", row.names = FALSE)
 #check L1_tree2 and species2 that do not match
-trees[which(trees$L1_tree2 == "blue ash"),]
+newstate[which(newstate$L1_tree2 == "buckhorn"),]
 
 
 #TREE3
@@ -238,7 +246,7 @@ L1tree3.species
 write.csv(L1tree3.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree3-species.csv", row.names = FALSE)
 write.csv(L1tree3.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L3tree-species.csv", row.names = FALSE)
 #check L1_tree3 and species3 that do not match
-trees[which(trees$L1_tree3 == "blue ash"),]
+newstate[which(newstate$L1_tree3 == "blue ash"),]
 
 
 #TREE4
@@ -247,7 +255,7 @@ L1tree4.species
 write.csv(L1tree4.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree4-species.csv", row.names = FALSE)
 write.csv(L1tree4.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L4tree-species.csv", row.names = FALSE)
 #check L1_tree4 and species4 that do not match
-trees[which(trees$L1_tree4 == "blue ash"),]
+newstate[which(newstate$L1_tree4 == "blue ash"),]
 
 
 ##############################################
@@ -290,6 +298,35 @@ write.csv(L1tree4.L3tree4, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_
 #check L1_tree4 and L3_tree4 that do not match
 trees[which(trees$L1_tree4 == "blue ash"),]
 
+######
+#combine all the L1 and L3 trees, to get a table with counts of all 4 trees L1/L3 labels
+#select L1 & L3 of just tree1
+L1.L3tree1 = newstate[,c("L1_tree1","L3_tree1")]
+colnames(L1.L3tree1) = c("L1_tree", "L3_tree")
+
+#select L1 & L3 of just tree2 and remove NAs
+L1.L3tree2 = newstate[,c("L1_tree2","L3_tree2")]
+L1.L3tree2 = L1.L3tree2[complete.cases(L1.L3tree2),]
+colnames(L1.L3tree2) = c("L1_tree", "L3_tree")
+
+#select L1 & L3 of just tree3 and remove NAs
+L1.L3tree3 = newstate[,c("L1_tree3","L3_tree3")]
+L1.L3tree3 = L1.L3tree3[complete.cases(L1.L3tree3),]
+colnames(L1.L3tree3) = c("L1_tree", "L3_tree")
+
+#select L1 & L3 of just tree4 and remove NAs
+L1.L3tree4= newstate[,c("L1_tree4","L3_tree4")]
+L1.L3tree4 = L1.L3tree4[complete.cases(L1.L3tree4),]
+colnames(L1.L3tree4) = c("L1_tree", "L3_tree")
+
+#combine all 4 L1&L3 trees
+combined = rbind(L1.L3tree1,L1.L3tree2,L1.L3tree3,L1.L3tree4)
+
+#create a table of the counts of L1 trees in the L3 categories
+library(dplyr)
+L1.L3combined = combined %>% group_by(L3_tree,L1_tree) %>% tally()
+
+write.csv(L1.L3combined, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1-L3trees_summary.csv", row.names = FALSE)
 
 ######################################
 ### Check for Duplicate X,Y points ###
@@ -300,7 +337,8 @@ trees[which(trees$L1_tree4 == "blue ash"),]
 cornersPointXcount = unique(state$x)
 length(cornersPointXcount)
 length(cornersPointXcount) == length(state$x) #needs to say TRUE
-#this says FALSE, but there is one corner that has the same xs, but differnt ys, so is okay.
+#In IN this says FALSE, but there is one corner that has the same xs, but differnt ys, so is okay - see below
+#for the specific corners that have the same xs, but different ys.
 
 # If the above says "FALSE" find the duplicate state$x
 xdups <-state[duplicated(state$x)|duplicated(state$x, fromLast=TRUE),]
@@ -366,7 +404,7 @@ setdiff(bearing2$Var1, bearing.combo$ComboName) #bearing2 values that are NOT in
 setdiff(bearing.combo$ComboName, bearing2$Var1) #this is less important, but nice for a check
 #it is the bearing.combo values that are NOT in the bearing2 list
 #find the bearing/bearingdir combination that is not in the list
-newstate[which(newstate$b2.check == "WE"),]
+newstate[which(newstate$b2.check == "W99999"),]
 #NAE    W99999 WE
 
 
@@ -441,8 +479,12 @@ library(plyr)
 state_desc = arrange(state,desc(state))
 View(state_desc) #look at the output to see if there are state in the first row
 
-statecount = count(state$state)
+#create a table of the counts of state entries
+library(dplyr)
+statecount = state %>% group_by(state) %>% tally()
 statecount
+
+sum(statecount$n)
 
 #SURVEYOR
 surveyor = state[order(state$surveyor_name),] 
@@ -453,9 +495,13 @@ library(plyr)
 surveyor_desc = arrange(state,desc(surveyor_name))
 View(surveyor_desc) #look at the output to see if there are surveyors in the first row
 
-surveyorcount = count(state$surveyor_name)
+#create a table of the counts of surveyor entries
+library(dplyr)
+surveyorcount = state %>% group_by(surveyor_name) %>% tally()
+surveyorcount
 View(surveyorcount)
-sum(surveyorcount$freq)
+
+sum(surveyorcount$n)
 
 #YEAR
 year = state[order(state$year),] 
@@ -466,9 +512,13 @@ library(plyr)
 year_desc = arrange(state,desc(year))
 View(year_desc) #look at the output to see if there are surveyors in the first row
 
-yearcount = count(state$year)
+#create a table of the counts of year entries
+library(dplyr)
+yearcount = state %>% group_by(year) %>% tally()
+yearcount
 View(yearcount)
-sum(yearcount$freq)
+
+sum(yearcount$n)
 
 #COUNTY
 county = state[order(state$hubtack_county),] 
@@ -478,9 +528,12 @@ View(county)
 county_desc = arrange(state,desc(hubtack_county))
 View(county_desc) #look at the output to see if there are surveyors in the first row
 
-countycount = count(state$hubtack_county)
+#create a table of the counts of County entries
+library(dplyr)
+countycount = state %>% group_by(hubtack_county) %>% tally()
 View(countycount)
-sum(countycount$freq)
+
+sum(countycount$n)
 
 #VERSION
 version = state[order(state$version),] 
@@ -490,9 +543,12 @@ View(version)
 version_desc = arrange(state,desc(version))
 View(version_desc) #look at the output to see if there are surveyors in the first row
 
-versioncount = count(state$version)
-View(versioncount)
-sum(versioncount$freq)
+#create a table of the counts of version entries
+library(dplyr)
+versioncount = state %>% group_by(version) %>% tally()
+versioncount
+
+sum(versioncount$n)
 
 
 ################################################################
@@ -529,7 +585,7 @@ reader.table$ILnames = c("Sam Pecoraro", "Jill Deines", "Christina Wiech", "Will
           "Emily Mears", "Caitlin Broderick", "Kim Bauer", "Amanda Buerger", "Alec Helmke", "Erin Nguyen","Da Som Kim", 
           "Mariel Cuellar", "Marissa Kivi", "Quercus Hamlin", "Bridget Bruns")
 
-#version IN 1.7 reader names NEED TO UPDATE THIS!
+#version IN 1.7 reader names 
 reader.table$INnames = c("Kelly Heilman", "Garrett Blad", "Hannah Legatzke", "Margaret Corcoran", "Benjamin Foster",
                          "Jaclyn Cooney", "Mairead Willis", "Jody Peters", "Zoe Volenec","Michelle Mueller", "Emily Mears",
                          "Will Chronister", "Nikki Micelotta", "Grace Saalman", "Kaitlin Powers", "Samniqueka Halsey, Morton Arboretum", 
@@ -544,7 +600,13 @@ length(reader.table$Var1)
 
 #number of trees 
 #you can get the number of corners by the total number of observations in the file
+#IN_v1.7 has 57065 corners total
+
 #and you can get the number of corners with trees from the number of observations in the newstate object
+newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),] #removes Water, Wet, No data, 
+#and No tree entries so only entries with trees are included in the new dataframe
+#IN_v1.7 has 49463 corners with trees
+
 #now need to get the number of trees in that newstate object
 tree1count = as.data.frame(table(newstate$L3_tree1))
 t1 = sum(tree1count$Freq)
@@ -559,6 +621,8 @@ tree.sum = c(t1,t2,t3,t4,sum(t1,t2,t3,t4))
 tree.sum.names = c("tree1","tree2","tree3","tree4","total")
 tree.sum.df = as.data.frame(tree.sum,tree.sum.names)
 tree.sum.df
+#IN_v1.7 has 97163 trees
+
 
 #table of years sorted by year
 year.table = as.data.frame(table(state$year))
@@ -725,7 +789,7 @@ library(dplyr)
 #tree1 diameter
 diameter1 = as.data.frame(table(state$diameter)) 
 diameter1 #scroll through the diameters looking for small or large weird values.
-state[which(state$diameter == 1),]
+state[which(state$diameter == 2.5),]
 diameter.check = as.data.frame(state[which(state$diameter >= 60 & state$diameter < 88888),c(1,5,7,10,20,21,22,23,29,35,85,86,87,88)])
 View(diameter.check)
 write.csv(diameter.check[order(diameter.check$diameter),], file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/diameter1_check.csv", row.names = FALSE)
@@ -766,11 +830,13 @@ state[which(state$degrees2 == "150"),]
 #tree1 degree
 degree1 = as.data.frame(table(state$degrees)) #scroll through the degrees looking for values over 90 or weird values.
 degree1
-state[which(state$degrees == 0.13),]
+tail(degree1)
+state[which(state$degrees == 91),]
 
 #tree2 degree
 degree2 = as.data.frame(table(state$degrees2)) #scroll through the degrees looking for values over 90 or weird values.
 degree2
+tail(degree2)
 state[which(state$degrees2 == 95),]
 state[which(state$degrees2 == 99.5),]
 
@@ -854,4 +920,58 @@ NotIn_ndinpls
 #Township 6N13E2 is a super small sliver. We have notes for this township, but it is so small that there are no 1/4 section
 #or section corners. So it is marked on the GIS map, because we have the notes, but it is not in the database, because
 #there are no corners for this township to enter.
+
+
+#########################################################
+## Get L1_treex & L3_treex table for Conversion Table ###
+#########################################################
+
+#this was done above when the L1 & L3 trees were checked. But can use the code again here.
+rm(list=ls())
+state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.7/ndinpls_v1.7_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),] #removes Water, Wet, No data, 
+#and No tree entries so only entries with trees are included in the new dataframe
+
+#combine all the L1 and L3 trees, to get a table with counts of all 4 trees L1/L3 labels
+#select L1 & L3 of just tree1
+L1.L3tree1 = newstate[,c("L1_tree1","L3_tree1")]
+colnames(L1.L3tree1) = c("L1_tree", "L3_tree")
+write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree1-L3tree1.csv", row.names = FALSE)
+write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree1-L3tree1.csv", row.names = FALSE)
+#check L1_tree1 and L3_tree1 that do not match
+newstate[which(trees$L1_tree1 == "blue ash"),]
+
+
+#select L1 & L3 of just tree2 and remove NAs
+L1.L3tree2 = newstate[,c("L1_tree2","L3_tree2")]
+L1.L3tree2 = L1.L3tree2[complete.cases(L1.L3tree2),]
+colnames(L1.L3tree2) = c("L1_tree", "L3_tree")
+write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree2-L3tree2.csv", row.names = FALSE)
+write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree2-L3tree2.csv", row.names = FALSE)
+
+
+#select L1 & L3 of just tree3 and remove NAs
+L1.L3tree3 = newstate[,c("L1_tree3","L3_tree3")]
+L1.L3tree3 = L1.L3tree3[complete.cases(L1.L3tree3),]
+colnames(L1.L3tree3) = c("L1_tree", "L3_tree")
+write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree3-L3tree3.csv", row.names = FALSE)
+write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree3-L3tree3.csv", row.names = FALSE)
+
+
+#select L1 & L3 of just tree4 and remove NAs
+L1.L3tree4= newstate[,c("L1_tree4","L3_tree4")]
+L1.L3tree4 = L1.L3tree4[complete.cases(L1.L3tree4),]
+colnames(L1.L3tree4) = c("L1_tree", "L3_tree")
+write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree4-L3tree4.csv", row.names = FALSE)
+write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree4-L3tree4.csv", row.names = FALSE)
+
+#combine all 4 L1&L3 trees
+combined = rbind(L1.L3tree1,L1.L3tree2,L1.L3tree3,L1.L3tree4)
+
+#create a table of the counts of L1 trees in the L3 categories
+library(dplyr)
+L1.L3combined = combined %>% group_by(L3_tree,L1_tree) %>% tally()
+
+write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1__L1-L3trees_summary.csv", row.names = FALSE)
+write.csv(L1.L3combined, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1-L3trees_summary2.csv", row.names = FALSE)
 
