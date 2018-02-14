@@ -552,7 +552,7 @@ sum(versioncount$n)
 
 
 ################################################################
-#### Check that Water/Wet entries have no trees entered ########
+#### Check that Water/Wet entries have no tree data entered ########
 ################################################################
 
 watercheck <- state[(state$water %in% c("Water","Wet","water","wet")),]
