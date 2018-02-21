@@ -7,7 +7,7 @@
 #also use this to help update the ndil[in]pls_vXX README files
 
 
-#QA/QC needs:
+#Code included in the QA/QC section:
 #1. Make sure all No tree, No data, Water, Wet have NA values in their diameter, degrees, chainstree columns for all 4 trees
 #2. Check for duplicate tree entries
 #3. check that L1_treex + species match up
@@ -18,6 +18,17 @@
 #7. check that there are entries for all state, surveyor, year, county 
 #8. check that Water/Wet entries have no trees entered
 #9. check that the TRPs listed in the data file are the same ones listed in the GIS layers
+
+#Code included in the section that creates a Summary of information for the ReadMe file (starts around line 580-ish):
+#1. readers - who they are and how many have entered data
+#2. number of corners, number of corners with trees, number of trees
+#3. table with the years the surveys were conducted
+#4. number of TRPs
+#5. PLS corners per TRP - check for any TRPs with more/less corners than 107-110
+#6. number of TRP in each version of additional data that have been entered
+#7. diameter, degree, and distance checks
+#8. TRP check between GIS map and csv
+#9. level 0 to level 3a conversion table
 
 
 #extra code in case you want to find a row with specific value in a column
@@ -31,7 +42,7 @@ rm(list=ls())
 
 #labeled both IL and IN files as "state" object so that I didn't need to create code for each state separately.
 #I originally had the code read: IL = read.csv(ndilpls_vX.X.csv") or IN = read.csv(ndinpls_vX.X.csv"), but switched to the following
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-1.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ndilpls_v1.8-2.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.7/ndinpls_v1.7_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
 
 
@@ -43,7 +54,7 @@ newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
 #just for fun select only the Water, Wet, No data and No tree entries and make sure that the total for
 #nontreestate and newstate equals the total entries for each state
 nontreestate <- state[(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
-#ILv1.8-1: nontreeIL = 29003, newIL = 28308, IL = 57311. They match!
+#ILv1.8-1: nontreeIL = 29007, newIL = 28304, IL = 57311. They match!
 #INv1.7: nontreeIN = 7602, newIN = 49463, IN = 57065. They match!
 
 #get a table of the counts of water, wet, no tree and no data
@@ -51,9 +62,10 @@ library(dplyr)
 nontreecounts = state %>% group_by(L3_tree1) %>% tally()
 View(nontreecounts)
 #In IN v1.7: 689 No data, 5595 No tree, 1295 Water and 23 Wet entries
+#In IL v1.8-2: 1300 No data, 27045 No tree, 625 Water and 37 Wet entries
 
 
-#sort newIL by trees to make sure all entries have trees in tree1 column
+#sort newstate by trees to make sure all entries have trees in tree1 column
 #sort ascending
 newstatesort = newstate[order(newstate$verbatim),] 
 View(newstatesort) #look at the output to see if there are trees in the first row
@@ -61,7 +73,7 @@ View(newstatesort) #look at the output to see if there are trees in the first ro
 #but came as a spreadsheet from Morton and the spreadsheet didn't have all the column headings (e.g., species, speciescode)
 #as if the data had been entered into MySQL. So wanted to sort by L1_tree1 because that was brought in from the Morton data.
 newstatesort = newstate[order(newstate$L1_tree1),] 
-View(newstatesort) #look
+View(newstatesort) #look at the output to see if there are trees in the first row
 
 
 #sort descending
@@ -127,8 +139,8 @@ View(temp4)
 ## CHECK IF THERE ARE DUPLICATE ENTRIES OF TREE DATA AT THE SAME CORNER ##
 ##########################################################################
 
-#remove entries with NANANA(IL) or NANA NA NA(IN) from tree 2 before you compare it to tree 1
-temporary.2 <- temporary[!(temporary$uniquetree2 %in% c("NANANA")),]
+#remove entries with NANANANA(IL) or NANA NA NA(IN) from tree 2 before you compare it to tree 1
+temporary.2 <- temporary[!(temporary$uniquetree2 %in% c("NANANANA")),]
 temporary.2 <- temporary[!(temporary$uniquetree2 %in% c("NANA NA NA")),]
 #TREE1 vs TREE2
 #compare TREE1 vs TREE2 - these will have the greatest chance of having duplicates
@@ -141,8 +153,8 @@ temporary.2[which(temporary.2$tree1_vs_tree2 == "TRUE"),]
 #save the output to make corrections in MySQL/Qualtrics/the state csv
 write.csv(temporary.2, file = "C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected/Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/INtree1_v_tree2.csv", row.names = FALSE)
 
-#remove entries with NANANA(IL) or NANA NA NA(IN) from tree 3
-temporary.3 <- temporary.2[!(temporary.2$uniquetree3 %in% c("NANANA")),]
+#remove entries with NANANANA(IL) or NANA NA NA(IN) from tree 3
+temporary.3 <- temporary.2[!(temporary.2$uniquetree3 %in% c("NANANANA")),]
 temporary.3 <- temporary.2[!(temporary.2$uniquetree3 %in% c("NANA NA NA")),]
 #TREE3 vs TREE2
 #look for duplicates for TREE3 compared to TREE2
@@ -153,6 +165,8 @@ temporary.3$tree2_vs_tree3 = tree2_vs_tree3
 #this finds the duplicates in TREE2 and TREE3 for each entry
 temporary.3[which(temporary.3$tree2_vs_tree3 == "TRUE"),]
 write.csv(temporary.3, file = "C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected/Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/INtree2_v_tree3.csv", row.names = FALSE)
+write.csv(temporary.3, file = "C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected/Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/ILtree2_v_tree3-2.csv", row.names = FALSE)
+
 #TREE3 vs TREE1
 #look for duplicates for TREE3 compared to TREE1
 tree1_vs_tree3 = 1:length(temporary.3$uniquetree1)
@@ -163,8 +177,8 @@ temporary.3$tree1_vs_tree3 = tree1_vs_tree3
 temporary.3[which(temporary.3$tree1_vs_tree3 == "TRUE"),]
 
 
-#remove entries with NANANA(IL) or NANA NA NA(IN) from tree 4
-temporary.4 <- temporary.3[!(temporary.3$uniquetree4 %in% c("NANANA")),]
+#remove entries with NANANANA(IL) or NANA NA NA(IN) from tree 4
+temporary.4 <- temporary.3[!(temporary.3$uniquetree4 %in% c("NANANANA")),]
 temporary.4 <- temporary.3[!(temporary.3$uniquetree4 %in% c("NANA NA NA")),]
 #TREE4 vs TREE3
 #look for duplicates for TREE4 compared to TREE3
@@ -174,6 +188,8 @@ temporary.4$tree4_vs_tree3 = tree4_vs_tree3
 
 #this finds the duplicates in TREE4 and TREE3 for each entry
 temporary.4[which(temporary.4$tree4_vs_tree3 == "TRUE"),]
+write.csv(temporary.4, file = "C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected/Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/ILtree3_v_tree4.csv", row.names = FALSE)
+
 
 #TREE4 vs TREE1
 #look for duplicates for TREE4 compared to TREE1
@@ -192,7 +208,7 @@ temporary.4$tree4_vs_tree2 = tree4_vs_tree2
 
 #this finds the duplicates in TREE4 and TREE2 for each entry
 temporary.4[which(temporary.4$tree4_vs_tree2 == "TRUE"),]
-
+write.csv(temporary.4, file = "C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected/Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/ILtree2_v_tree4.csv", row.names = FALSE)
 
 ################################################################################
 ## CHECK IF THERE ARE DUPLICATE ENTRIES OF TREE DATA WITHIN THE WHOLE DATASET ##
@@ -209,11 +225,14 @@ uniquetemporary = newstate[,c("TRP","page","entry_id","reader_initials","hubtack
 uniquecount = unique(uniquetemporary$masteruniquetree)
 length(uniquecount)
 length(uniquecount) == length(uniquetemporary$masteruniquetree) #needs to say TRUE
+#for IL and IN there are duplicates that Jody has checked and either corrected or marked as ok, because they 
+#are actual duplicates in the notes.
+
 
 # If the above says "FALSE" find the duplicated masteruniquetrees
 uniquedups <-uniquetemporary[duplicated(uniquetemporary$masteruniquetree)|duplicated(uniquetemporary$masteruniquetree, fromLast=TRUE),]
 uniquedups2 = uniquedups[order(uniquedups$masteruniquetree),] 
-write.csv(uniquedups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/uniquetree_duplicates_v1.8-1_2.csv", row.names = FALSE)
+write.csv(uniquedups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/uniquetree_duplicates_v1.8-2-2.csv", row.names = FALSE)
 write.csv(uniquedups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/uniquetree_duplicates_vIN1.7_take3.csv", row.names = FALSE)
 
 
@@ -225,7 +244,7 @@ write.csv(uniquedups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC O
 library(plyr)
 L1tree1.species <- ddply(newstate, .(newstate$species, newstate$L1_tree1), nrow)
 L1tree1.species
-write.csv(L1tree2.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree1-species.csv", row.names = FALSE)
+write.csv(L1tree1.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree1-species.csv", row.names = FALSE)
 write.csv(L1tree1.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree-species_take2.csv", row.names = FALSE)
 #check L1_tree1 and species1 that do not match
 newstate[which(newstate$L1_tree1 == "blue ash"),]
@@ -234,7 +253,7 @@ newstate[which(newstate$L1_tree1 == "blue ash"),]
 #TREE2
 L1tree2.species <- ddply(newstate, .(newstate$species2, newstate$L1_tree2), nrow)
 L1tree2.species
-write.csv(L1tree2.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree2-species.csv", row.names = FALSE)
+write.csv(L1tree2.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree2-species.csv", row.names = FALSE)
 write.csv(L1tree2.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L2tree-species_take2.csv", row.names = FALSE)
 #check L1_tree2 and species2 that do not match
 newstate[which(newstate$L1_tree2 == "buckhorn"),]
@@ -243,7 +262,7 @@ newstate[which(newstate$L1_tree2 == "buckhorn"),]
 #TREE3
 L1tree3.species <- ddply(newstate, .(newstate$species3, newstate$L1_tree3), nrow)
 L1tree3.species
-write.csv(L1tree3.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree3-species.csv", row.names = FALSE)
+write.csv(L1tree3.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree3-species.csv", row.names = FALSE)
 write.csv(L1tree3.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L3tree-species.csv", row.names = FALSE)
 #check L1_tree3 and species3 that do not match
 newstate[which(newstate$L1_tree3 == "blue ash"),]
@@ -252,7 +271,7 @@ newstate[which(newstate$L1_tree3 == "blue ash"),]
 #TREE4
 L1tree4.species <- ddply(newstate, .(newstate$species4, newstate$L1_tree4), nrow)
 L1tree4.species
-write.csv(L1tree4.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree4-species.csv", row.names = FALSE)
+write.csv(L1tree4.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree4-species.csv", row.names = FALSE)
 write.csv(L1tree4.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L4tree-species.csv", row.names = FALSE)
 #check L1_tree4 and species4 that do not match
 newstate[which(newstate$L1_tree4 == "blue ash"),]
@@ -266,7 +285,7 @@ newstate[which(newstate$L1_tree4 == "blue ash"),]
 library(plyr)
 L1tree1.L3tree1 <- ddply(newstate, .(newstate$L3_tree1, newstate$L1_tree1), nrow)
 L1tree1.L3tree1
-write.csv(L1tree1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree1-L3tree1_2.csv", row.names = FALSE)
+write.csv(L1tree1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree1-L3tree1.csv", row.names = FALSE)
 write.csv(L1tree1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree1-L3tree1.csv", row.names = FALSE)
 #check L1_tree1 and L3_tree1 that do not match
 trees[which(trees$L1_tree1 == "blue ash"),]
@@ -275,7 +294,7 @@ trees[which(trees$L1_tree1 == "blue ash"),]
 #TREE2
 L1tree2.L3tree2 <- ddply(newstate, .(newstate$L3_tree2, newstate$L1_tree2), nrow)
 L1tree2.L3tree2
-write.csv(L1tree2.L3tree2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree2-L3tree2_2.csv", row.names = FALSE)
+write.csv(L1tree2.L3tree2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree2-L3tree2.csv", row.names = FALSE)
 write.csv(L1tree2.L3tree2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree2-L3tree2.csv", row.names = FALSE)
 #check L1_tree2 and L3_tree2 that do not match
 trees[which(trees$L1_tree2 == "blue ash"),]
@@ -284,7 +303,7 @@ trees[which(trees$L1_tree2 == "blue ash"),]
 #TREE3
 L1tree3.L3tree3 <- ddply(newstate, .(newstate$L3_tree3, newstate$L1_tree3), nrow)
 L1tree3.L3tree3
-write.csv(L1tree3.L3tree3, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree3-L3tree3_2.csv", row.names = FALSE)
+write.csv(L1tree3.L3tree3, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree3-L3tree3.csv", row.names = FALSE)
 write.csv(L1tree3.L3tree3, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree3-L3tree3.csv", row.names = FALSE)
 #check L1_tree3 and L3_tree3 that do not match
 trees[which(trees$L1_tree3 == "blue ash"),]
@@ -293,7 +312,7 @@ trees[which(trees$L1_tree3 == "blue ash"),]
 #TREE4
 L1tree4.L3tree4 <- ddply(newstate, .(newstate$L3_tree4, newstate$L1_tree4), nrow)
 L1tree4.L3tree4
-write.csv(L1tree4.L3tree4, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree4-L3tree4_2.csv", row.names = FALSE)
+write.csv(L1tree4.L3tree4, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1tree4-L3tree4.csv", row.names = FALSE)
 write.csv(L1tree4.L3tree4, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1tree4-L3tree4.csv", row.names = FALSE)
 #check L1_tree4 and L3_tree4 that do not match
 trees[which(trees$L1_tree4 == "blue ash"),]
@@ -327,6 +346,8 @@ library(dplyr)
 L1.L3combined = combined %>% group_by(L3_tree,L1_tree) %>% tally()
 
 write.csv(L1.L3combined, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1-L3trees_summary.csv", row.names = FALSE)
+write.csv(L1.L3combined, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1-L3trees_summary.csv", row.names = FALSE)
+
 
 ######################################
 ### Check for Duplicate X,Y points ###
@@ -348,8 +369,9 @@ xdups2 = xdups[order(xdups$entry_id),]#use this after you have corrected the dup
 xdups2[,1:5] #you can compare the corners thave have duplicate xs, but different ys that are supposed to be like that.
 
 #for IN v1.7 there are 12 corners (6 pairs) with the same x coordinates but different y coordinates
+#for IL v1.8-2 there are 2 corners (1 pair) with the same x coordinates but different y coordinates
 
-write.csv(xdups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/x_duplicates.csv", row.names = FALSE)
+write.csv(xdups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/x_duplicates.csv", row.names = FALSE)
 write.csv(xdups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/x_duplicates.csv", row.names = FALSE)
 
 
@@ -364,6 +386,7 @@ ydups
 ydups2 = ydups[order(ydups$y),] 
 ydups2[,1:29]
 #for IN v1.7 there are 4 corners (2 pairs) with the same y coordinates but different x coordinates
+#for IL v1.8-2 there are no corners with different y coordinates
 
 write.csv(ydups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/y_duplicates.csv", row.names = FALSE)
 write.csv(ydups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/y_duplicates.csv", row.names = FALSE)
@@ -466,7 +489,7 @@ write.csv(entryid.dups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC
 #can use code below, but may be easier to sort in excel and find if there are any missing at the bottom
 
 rm(list=ls())
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-1.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ndilpls_v1.8-2.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.7/ndinpls_v1.7_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
 
 
@@ -568,7 +591,7 @@ write.csv(watercheck[order(watercheck$L3_tree1),], file = "./Indiana/IN PLS for 
 #### Summary Code to Use for ReadMe File                ########
 ################################################################
 rm(list=ls())
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-1.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ndilpls_v1.8-2.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.7/ndinpls_v1.7_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
 
 
@@ -579,7 +602,7 @@ reader.table
 #compare the names in reader.table to the reader.table$names listed below.
 #version IL 1.8 reader names
 reader.table$ILnames = c("Sam Pecoraro", "Jill Deines", "Christina Wiech", "Will Tintor", "Jaclyn Cooney", "Rebecca O'Neil", 
-          "Margaret Corcoran", "Benjamin Foster", "Grace Saalman", "Andrew Muench", "Nicole Fantozzi", "Nikki Micelotta",
+          "Margaret Corcoran", "Benjamin Foster", "Andrew Muench", "Nicole Fantozzi", "Grace Saalman","Nikki Micelotta",
           "Claire Mattison", "Isaac Evans", "Annie Han", "Will Chronister", "Kate Augustine", "Garrett Blad", 
           "Michelle Mueller", "Hannah Legatzke", "Zoe Volenec", "Kaitlin Powers","Anna Levesque", "Jody Peters", 
           "Emily Mears", "Caitlin Broderick", "Kim Bauer", "Amanda Buerger", "Alec Helmke", "Erin Nguyen","Da Som Kim", 
@@ -598,14 +621,16 @@ length(reader.table$Var1)
 #35 students & Jody and Jill entered data for Illinois in version 1.8
 #29 students & Jody entered data for Indiana in version 1.7
 
-#number of trees 
+#number of corners 
 #you can get the number of corners by the total number of observations in the file
 #IN_v1.7 has 57065 corners total
+#IL_v1.8-2 has 57311 corners total
 
 #and you can get the number of corners with trees from the number of observations in the newstate object
 newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),] #removes Water, Wet, No data, 
 #and No tree entries so only entries with trees are included in the new dataframe
 #IN_v1.7 has 49463 corners with trees
+#IL_v1.8-2 has 28304 corners with trees
 
 #now need to get the number of trees in that newstate object
 tree1count = as.data.frame(table(newstate$L3_tree1))
@@ -622,7 +647,7 @@ tree.sum.names = c("tree1","tree2","tree3","tree4","total")
 tree.sum.df = as.data.frame(tree.sum,tree.sum.names)
 tree.sum.df
 #IN_v1.7 has 97163 trees
-
+#IL_v1.8-2 has 54552 trees
 
 #table of years sorted by year
 year.table = as.data.frame(table(state$year))
@@ -703,7 +728,7 @@ unique(sort2$version)
 version1.8 = subset(sort2,version == 1.8, select=c(TRP,version,corners))
 View(version1.8[order(version1.8$TRP),])
 version1.8$TRP
-#24 version 1.8-1 townships
+#24 version 1.8-2 townships
 
 
 version1.7 = subset(sort2,version == 1.7, select=c(TRP,version,corners))
@@ -779,6 +804,7 @@ version1.5.1$TRP
 #### Diameter, Degree, and Distance(Links) Checks ########
 ##########################################################
 rm(list=ls())
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ndilpls_v1.8-2.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.7/ndinpls_v1.7_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
 
 #DIAMETER COUNTS
@@ -833,12 +859,19 @@ degree1
 tail(degree1)
 state[which(state$degrees == 91),]
 
+degree.check1 = as.data.frame(state[which(state$degrees >= 90 & state$degrees < 88888),c(1,5,7,10,20,21,22,23,29,37,85,86,87,88)])
+View(degree.check1)                                                                     
+
 #tree2 degree
 degree2 = as.data.frame(table(state$degrees2)) #scroll through the degrees looking for values over 90 or weird values.
 degree2
 tail(degree2)
 state[which(state$degrees2 == 95),]
 state[which(state$degrees2 == 99.5),]
+
+degree.check2 = as.data.frame(state[which(state$degrees2 >= 90 & state$degrees2 < 88888),c(1,5,7,10,20,21,22,23,29,47,85,86,87,88)])
+View(degree.check2)                                                                     
+
 
 #tree3 degree
 degree3 = as.data.frame(table(state$degrees3)) #scroll through the degrees looking for values over 90 or weird values.
@@ -922,13 +955,15 @@ NotIn_ndinpls
 #there are no corners for this township to enter.
 
 
-#########################################################
-## Get L1_treex & L3_treex table for Conversion Table ###
-#########################################################
+################################################################################################
+## Create a Level0 to Level3a conversion table that can be used to update the conversion file###
+################################################################################################
 
 #this was done above when the L1 & L3 trees were checked. But can use the code again here.
 rm(list=ls())
+setwd("C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected")
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.7/ndinpls_v1.7_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ndilpls_v1.8-2.csv", header = TRUE, stringsAsFactors = FALSE)
 newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),] #removes Water, Wet, No data, 
 #and No tree entries so only entries with trees are included in the new dataframe
 
@@ -972,6 +1007,35 @@ combined = rbind(L1.L3tree1,L1.L3tree2,L1.L3tree3,L1.L3tree4)
 library(dplyr)
 L1.L3combined = combined %>% group_by(L3_tree,L1_tree) %>% tally()
 
-write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1__L1-L3trees_summary.csv", row.names = FALSE)
+write.csv(L1.L3combined, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/QA_QC/IL1.8-2_L1-L3trees_summary.csv", row.names = FALSE)
 write.csv(L1.L3combined, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/IN1.7_L1-L3trees_summary2.csv", row.names = FALSE)
+
+
+#join Level2 and Comments from the L0 to L3 conversion file.
+#read in the conversion file
+conversion = read.csv("C:/Users/jmurray7/Dropbox/PalEON2/Conversion Tables - Allometry, PEcAn, PLS, FIA/conversion files uploaded to wiki/level0_to_level3a_v0.4-6.csv",header = TRUE, stringsAsFactors = FALSE)
+#subset just the domain you want
+#use unique(conversion$domain) to find the name of the Domains
+ILconversion = conversion[which(conversion$domain == "Illinois_v1.8-2"),]
+INconversion = conversion[which(conversion$domain == "ND Indiana v1.7"),]
+
+#merge the L1.L3 count file with the conversion file - keeping all the L1.L3 entries (left outer join)
+ILconversion_merge = merge(x=L1.L3combined, y=ILconversion, by.x = "L1_tree", by.y = "level1", all.x = TRUE)
+
+#now the column headings are not in the same order as the IL conversion so we won't be able to seamlessly combine
+#the updated conversion data with the old conversione file. SO select each column and then join into a database
+#that is in the same order as the conversion file
+level0 = ILconversion_merge$level0
+level1 = ILconversion_merge$L1_tree
+level2 = ILconversion_merge$level2
+check = ILconversion_merge$check
+level3a = ILconversion_merge$L3_tree
+count = ILconversion_merge$n
+domain = ILconversion_merge$domain
+comments = ILconversion_merge$comments
+
+conversiontable = data.frame(cbind(level0,level1, level2, check, level3a, count, domain, comments), stringsAsFactors = FALSE)
+colnames(conversiontable) = c("level0","level1","level2","check","level3a","count","domain","comments")
+
+write.csv(conversiontable, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ILconversion1.8-2.csv", row.names = FALSE)
 
