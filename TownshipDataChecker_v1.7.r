@@ -8,6 +8,8 @@
 #to entering and storing data with qualtrics.nd.edu Project GLO_v1.0 and GLO_v2.0.
 #Jody updated the code to be able to take the checked Qualtrics entries saved as csvs and
 #run these double checks
+#on 2-22-18 JP updated the code because the NA bearingdir were not being caught and the
+#Rechecks were coded to catch things entered as "Y", but the Rechecks are marked "Yes"
 # TO SEE THE FULL LIST OF VERSION UPDATES, GO TO THE BOTTOM OF THIS FILE
 
 
@@ -34,8 +36,8 @@ rm(list=ls(all=TRUE))
 #  and saving this file). 
 
 #  ## WILL NEED TO CHANGE FILE NAME FOR YOUR TOWNSHIP ##
-town <- read.csv("./Qualtrics Checks By Reader/Checked Townships/33N13E2_QualtricsCleaned_Checked.csv", header = TRUE, sep=",", na.strings = "NULL", stringsAsFactors = FALSE)
-township.name <- "33N13E2_Dekalb"
+town <- read.csv("./Qualtrics Checks By Reader/Checked Townships/5S10W2_QualtricsCleaned_Checked.csv", header = TRUE, sep=",", na.strings = "NULL", stringsAsFactors = FALSE)
+township.name <- "5S10W2_Vandenburgh"
 
 #this is to read in the Hamilton Test township
 #town <- read.csv("./Township Data Checks/5S7E3_Hamilton_Checked_witherrors.csv", header = TRUE, sep=",", na.strings = "NULL", stringsAsFactors = FALSE)
@@ -51,8 +53,6 @@ R.checker.version <- "Version 1.7"
 town$typecorner = gsub("1/4 Section","(1/4) Section",town$typecorner) #change 1/4 Section in type corner to (1/4) Section to be consistent with the rest of the PLS database
 town$typecorner = gsub("1/4 section","(1/4) Section",town$typecorner) #change 1/4 section in type corner to (1/4) Section to be consistent with the rest of the PLS database
 
-#change the NAs in no data to blank
-town$nodata = gsub("NA","",town$nodata)
 
 #############################
 ## TYPOS OR MISSING VALUES ##
@@ -375,23 +375,43 @@ town$chainstree4 <- as.numeric(as.character(town$chainstree4))
 # 2 - if bearingdir has value (True = 1 of 4 possible values (N, S, 99999, 88888); False = no data/blank or invalid value)
 compass <- !is.na(town$chainstree) == (town$bearingdir == "E" | town$bearingdir == "W" | town$bearingdir == "99999" | town$bearingdir == "88888")
 compass.view <- town[which(compass == "FALSE"),c("bearing", "degrees","bearingdir","chainstree","cornerid","entry_id")]
+#compassa <- is.na(town$bearingdir) == (town$bearingdir == "E" | town$bearingdir == "W" | town$bearingdir == "99999" | town$bearingdir == "88888" |town$chainstree == "NA")
+#compass.viewa <- town[is.na(compassa),c("bearing", "degrees","bearingdir","chainstree","cornerid","entry_id")]
+
+compassa <- is.na(compass)
+compassb <- town[which(compassa == "TRUE"),c("bearing","degrees", "bearingdir","chainstree","cornerid","entry_id")]
+compassc <- compassb[which(compassb$chainstree >= 0),]
+
+
+
 
 ## repeat for tree 2
 compass2 <- !is.na(town$chainstree2) == (town$bearingdir2 == "E" | town$bearingdir2 == "W" | town$bearingdir2 == "99999" | town$bearingdir2 == "88888")
 compass.view2 <- town[which(compass2 == "FALSE"),c("bearing2", "degrees2","bearingdir2","chainstree2","cornerid","entry_id")]
+#compass2a <- is.na(town$bearingdir2) == (town$bearingdir2 == "E" | town$bearingdir2 == "W" | town$bearingdir2 == "99999" | town$bearingdir2 == "88888" | !is.na(town$chainstree2))
+#compass.view2a <- town[is.na(compass2),c("bearing2", "degrees2","bearingdir2","chainstree2","cornerid","entry_id")]
+compass2a <- is.na(compass2)
+compass2b <- town[which(compass2a == "TRUE"),c("bearing2","degrees2", "bearingdir2","chainstree2","cornerid","entry_id")]
+compass2c <- compass2b[which(compass2b$chainstree2 >= 0),]
+
 
 ## repeat for tree 3
 compass3 <- !is.na(town$chainstree3) == (town$bearingdir3 == "E" | town$bearingdir3 == "W" | town$bearingdir3 == "99999" | town$bearingdir3 == "88888")
 compass.view3 <- town[which(compass3 == "FALSE"),c("bearing3", "degrees3","bearingdir3","chainstree3","cornerid","entry_id")]
+#compass.view3a <- town[is.na(compass3),c("bearing3", "degrees3","bearingdir3","chainstree3","cornerid","entry_id")]
+compass3a <- is.na(compass3)
+compass3b <- town[which(compass3a == "TRUE"),c("bearing3","degrees3", "bearingdir3","chainstree3","cornerid","entry_id")]
+compass3c <- compass3b[which(compass3b$chainstree3 >= 0),]
+
+
 
 ## repeat for tree 4
 compass4 <- !is.na(town$chainstree4) == (town$bearingdir4 == "E" | town$bearingdir4 == "W" | town$bearingdir4 == "99999" | town$bearingdir4 == "88888")
 compass.view4 <- town[which(compass4 == "FALSE"),c("bearing4", "degrees4","bearingdir4","chainstree4","cornerid","entry_id")]
+compass4a <- is.na(compass4)
+compass4b <- town[which(compass4a == "TRUE"),c("bearing4","degrees4", "bearingdir4","chainstree4","cornerid","entry_id")]
+compass4c <- compass4b[which(compass4b$chainstree4 >= 0),]
 
-
-#this will let the list of errors to come up in the final report below
-compass.interior <- list(compass.view, compass.view2, compass.view3, compass.view4)
-compass.interior
 
 
 ########################
@@ -692,9 +712,10 @@ cornerid.dups
 # create list of all entries flagged for recheck with reason and any fixed messages
 
 # if flagged for recheck, list error and fixed message, if present
-recheck = town[which(town$recheck == "Y"),c("cornerid","recheck","reason","entry_id")]
+recheck = town[which(town$recheck == "Yes"),c("cornerid","recheck","reason","entry_id")]
 recheck
-
+recheck2 = town[which(town$recheck == "Y"),c("cornerid","recheck","reason","entry_id")]
+recheck2
 
 ## LIST ERRORS FOR OUTPUT ##
 # create report metadata
@@ -739,9 +760,13 @@ output <- list(metadata = metadata,
                degrees.3 = if(nrow(acute.view3)>0) acute.view3 else "none",
                degrees.4 = if(nrow(acute.view4)>0) acute.view4 else "none",
                bearingdir1 = if(nrow(compass.view)>0) compass.view else "none",
+               bearingdirNAs = if(nrow(compassc)>0) compassc else "none",
                bearingdir2 = if(nrow(compass.view2)>0) compass.view2 else "none",
+               bearingdirNAs = if(nrow(compass2c)>0) compass2c else "none",
                bearingdir3 = if(nrow(compass.view3)>0) compass.view3 else "none",
+               bearingdirNAs = if(nrow(compass3c)>0) compass3c else "none",
                bearingdir4 = if(nrow(compass.view4)>0) compass.view4 else "none",
+               bearingdirNAs = if(nrow(compass4c)>0) compass4c else "none",
                decimal.links1 = if(nrow(decimalstree1)>0) decimalstree1 else "none",
                decimal.links2 = if(nrow(decimalstree2)>0) decimalstree2 else "none",
                decimal.links3 = if(nrow(decimalstree3)>0) decimalstree3 else "none",
@@ -755,8 +780,8 @@ output <- list(metadata = metadata,
                extra.NWborder = if(exists('NWbordercorners.test')) NWbordercorners.test else "none",
                cornerid.dups = if(nrow(cornerid.dups)>0) cornerid.dups else"none",
                recheck = if(nrow(recheck)>0) recheck else "none",
+               recheck2 = if(nrow(recheck2)>0) recheck2 else "none",
                verbatim.trees = "sort by verbatim trees and check for weird names (e.g., Di which should be Do or one post oaks with lots of pin oaks, etc.) - Done?",
-               no.tree.entries = "remove 'YES' from notree column for entries with trees - Done?",
                illegible.missing = "search for entries with 88888s or 99999s. make sure there are notes in the General Notes column explaining these entries - Done?",
                no.data = "check that there is a description of why there is no data (e.g., page missing, indian territory, etc)",
                no.tree = "check corners marked no trees has include details about condition of corner (e.g., post in mound, post, etc)",
@@ -773,8 +798,30 @@ sink(file = paste("./Township Data Checks/Output/", township.name, ".txt", sep="
 output_reduced
 sink() # stops sinking
 
-##sort by cornerid then re-write the town file to make the 1/4 section correction and adding the NAs to the bearing and bearingdir entries.
+##sort by cornerid then re-write the town file to make the 1/4 section correction 
+#and remove the NAs from the ecotype to fixed columns
 town = town[order(town$cornerid),] 
+town$sectiona = gsub("NA","",town$sectiona)
+town$sectionb = gsub("NA","",town$sectionb)
+town$nodata = gsub("NA","",town$nodata)
+town$notree = gsub("NA","",town$notree)
+town$ecotype = gsub("NA","",town$ecotype)
+town$ecotypenotes = gsub("NA","",town$ecotypenotes)
+town$ecotype2 = gsub("NA","",town$ecotype2)
+town$ecotypenotes2 = gsub("NA","",town$ecotypenotes2)
+town$ecotype3 = gsub("NA","",town$ecotype3)
+town$ecotypenotes3 = gsub("NA","",town$ecotypenotes3)
+town$water = gsub("NA","",town$water)
+town$feature = gsub("NA","",town$feature)
+town$featurenotes = gsub("NA","",town$featurenotes)
+town$timbernotes = gsub("NA","",town$timbernotes)
+town$understorynotes = gsub("NA","",town$understorynotes)
+town$landnotes = gsub("NA","",town$landnotes)
+town$landnotesvb = gsub("NA","",town$landnotesvb)
+town$generalnotes = gsub("NA","",town$generalnotes)
+town$recheck = gsub("NA","",town$recheck)
+town$reason = gsub("NA","",town$reason)
+town$fixed = gsub("NA","",town$fixed)
 write.csv(town, paste0("./Qualtrics Checks By Reader/Checked Townships/QA_QC Checks/", township.name, "_Checked_RINPROGRESS.csv"), row.names = FALSE)
 
 
