@@ -11,7 +11,6 @@
 # 2. Put in a note to check the corners where year = 9999. In the PLS Products Github repo
 # we are making the 9999 years have the same year as adjacent corners. Make sure this still
 # makes sense as we add more data.
-# 3. Create histograms of diameter distributions for each Level 3 taxa
 
 
 #Code included in the QA/QC section:
@@ -26,6 +25,7 @@
 #8. check that Water/Wet entries have no trees entered
 #9. check that the TRPs listed in the data file are the same ones listed in the GIS layers
 #10. Check that all typecorners are Section, (1/4) Section, and Township
+#11. Create histograms of diameter distributions for each Level 3 taxa
 
 #Code included in the section that creates a Summary of information for the ReadMe file (starts around line 580-ish):
 #1. readers - who they are and how many have entered data
@@ -1168,6 +1168,8 @@ write.csv(conversiontable, file = "./MIconversion_v1.0.csv", row.names = FALSE)
 ########################################################################################
 rm(list=ls())
 state = read.csv("southernMI_Detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.8/ndinpls_v1.8_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ndilpls_v1.8-2.csv", header = TRUE, stringsAsFactors = FALSE)
 
 newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),] #removes Water, Wet, No data, 
 #and No tree entries so only entries with trees are included in the new dataframe
@@ -1195,38 +1197,19 @@ colnames(L3tree4.diameter) = c("L3_tree", "diameter")
 #combine all 4 L3 trees and diameter
 combined = rbind(L3tree1.diameter,L3tree2.diameter,L3tree3.diameter,L3tree4.diameter)
 
-#create a table of the counts of L1 trees in the L3 categories
-library(dplyr)
-L3.diam.combined = combined %>% group_by(L3_tree, diameter) %>% tally()
 
-L3tree.names = as.data.frame(unique(combined$L3_tree))
+L3tree.names = as.data.frame(unique(sort(combined$L3_tree)))
 colnames(L3tree.names) = c("L3_tree")
 L3tree.names
 
 #select individual taxa
-Oak = combined[combined$L3_tree == 'Oak',]
-Oak = Oak[which(Oak$diameter < 88888),]
-hist(Oak$diameter, breaks = 15)
+Alder = combined[combined$L3_tree == 'Alder',]
+Alder = Alder[which(Alder$diameter < 88888),]
+hist(Alder$diameter, breaks = 15)
 
 Ash = combined[combined$L3_tree == 'Ash',]
 Ash = Ash[which(Ash$diameter < 88888),]
 hist(Ash$diameter, breaks = 15)
-
-Elm = combined[combined$L3_tree == 'Elm',]
-Elm = Elm[which(Elm$diameter < 88888),]
-hist(Elm$diameter, breaks = 15)
-
-Hickory = combined[combined$L3_tree == 'Hickory',]
-Hickory = Hickory[which(Hickory$diameter < 88888),]
-hist(Hickory$diameter, breaks = 15)
-
-Maple = combined[combined$L3_tree == 'Maple',]
-Maple = Maple[which(Maple$diameter < 88888),]
-hist(Maple$diameter, breaks = 15)
-
-Ironwood = combined[combined$L3_tree == 'Ironwood',]
-Ironwood = Ironwood[which(Ironwood$diameter < 88888),]
-hist(Ironwood$diameter, breaks = 15)
 
 Basswood = combined[combined$L3_tree == 'Basswood',]
 Basswood = Basswood[which(Basswood$diameter < 88888),]
@@ -1240,61 +1223,109 @@ Birch = combined[combined$L3_tree == 'Birch',]
 Birch = Birch[which(Birch$diameter < 88888),]
 hist(Birch$diameter, breaks = 15)
 
-Sycamore = combined[combined$L3_tree == 'Sycamore',]
-Sycamore = Sycamore[which(Sycamore$diameter < 88888),]
-hist(Sycamore$diameter, breaks = 15)
-
-Poplar.Tulippoplar = combined[combined$L3_tree == 'Poplar/tulip poplar',]
-Poplar.Tulippoplar = Poplar.Tulippoplar[which(Poplar.Tulippoplar$diameter < 88888),]
-hist(Poplar.Tulippoplar$diameter, breaks = 15)
-
-Tamarack = combined[combined$L3_tree == 'Tamarack',]
-Tamarack = Tamarack[which(Tamarack$diameter < 88888),]
-hist(Tamarack$diameter, breaks = 15)
-
-Poplar = combined[combined$L3_tree == 'Poplar',]
-Poplar = Poplar[which(Poplar$diameter < 88888),]
-hist(Poplar$diameter, breaks = 15)
-
-Walnut = combined[combined$L3_tree == 'Walnut',]
-Walnut = Walnut[which(Walnut$diameter < 88888),]
-hist(Walnut$diameter, breaks = 15)
+Blgum = combined[combined$L3_tree == 'Black gum',]
+Blgum = Blgum[which(Blgum$diameter < 88888),]
+hist(Blgum$diameter, breaks = 15)
 
 Blgum.Swgum = combined[combined$L3_tree == 'Black gum/sweet gum',]
 Blgum.Swgum = Blgum.Swgum[which(Blgum.Swgum$diameter < 88888),]
 hist(Blgum.Swgum$diameter, breaks = 15)
 
-Other.hardwood = combined[combined$L3_tree == 'Other hardwood',]
-Other.hardwood = Other.hardwood[which(Other.hardwood$diameter < 88888),]
-hist(Other.hardwood$diameter, breaks = 15)
+Buckeye = combined[combined$L3_tree == 'Buckeye',]
+Buckeye = Buckeye[which(Buckeye$diameter < 88888),]
+hist(Buckeye$diameter, breaks = 15)
 
-Unknown = combined[combined$L3_tree == 'Unknown tree',]
-Unknown = Unknown[which(Unknown$diameter < 88888),]
-hist(Unknown$diameter, breaks = 15)
+Cedar.juniper = combined[combined$L3_tree == 'Cedar/juniper',]
+Cedar.juniper = Cedar.juniper[which(Cedar.juniper$diameter < 88888),]
+hist(Cedar.juniper$diameter, breaks = 15)
 
 Cherry = combined[combined$L3_tree == 'Cherry',]
 Cherry = Cherry[which(Cherry$diameter < 88888),]
 hist(Cherry$diameter, breaks = 15)
 
-Buckeye = combined[combined$L3_tree == 'Buckeye',]
-Buckeye = Buckeye[which(Buckeye$diameter < 88888),]
-hist(Buckeye$diameter, breaks = 15)
+Chestnut = combined[combined$L3_tree == 'Chestnut',]
+Chestnut = Chestnut[which(Chestnut$diameter < 88888),]
+hist(Chestnut$diameter, breaks = 15)
 
 Dogwood = combined[combined$L3_tree == 'Dogwood',]
 Dogwood = Dogwood[which(Dogwood$diameter < 88888),]
 hist(Dogwood$diameter, breaks = 15)
 
+Elm = combined[combined$L3_tree == 'Elm',]
+Elm = Elm[which(Elm$diameter < 88888),]
+hist(Elm$diameter, breaks = 15)
+
+Hackberry = combined[combined$L3_tree == 'Hackberry',]
+Hackberry = Hackberry[which(Hackberry$diameter < 88888),]
+hist(Hackberry$diameter, breaks = 15)
+
+Hemlock = combined[combined$L3_tree == 'Hemlock',]
+Hemlock = Hemlock[which(Hemlock$diameter < 88888),]
+hist(Hemlock$diameter, breaks = 15)
+
+Hickory = combined[combined$L3_tree == 'Hickory',]
+Hickory = Hickory[which(Hickory$diameter < 88888),]
+hist(Hickory$diameter, breaks = 15)
+
+Ironwood = combined[combined$L3_tree == 'Ironwood',]
+Ironwood = Ironwood[which(Ironwood$diameter < 88888),]
+hist(Ironwood$diameter, breaks = 15)
+
 Locust = combined[combined$L3_tree == 'Locust',]
 Locust = Locust[which(Locust$diameter < 88888),]
 hist(Locust$diameter, breaks = 15)
 
-Chestnut = combined[combined$L3_tree == 'Chestnut',]
-Chestnut = Chestnut[which(Chestnut$diameter < 88888),]
-hist(Chestnut$diameter, breaks = 15)
+Maple = combined[combined$L3_tree == 'Maple',]
+Maple = Maple[which(Maple$diameter < 88888),]
+hist(Maple$diameter, breaks = 15)
+
+Mulberry = combined[combined$L3_tree == 'Mulberry',]
+Mulberry = Mulberry[which(Mulberry$diameter < 88888),]
+hist(Mulberry$diameter, breaks = 15)
+
+Oak = combined[combined$L3_tree == 'Oak',]
+Oak = Oak[which(Oak$diameter < 88888),]
+hist(Oak$diameter, breaks = 15)
+
+Other.hardwood = combined[combined$L3_tree == 'Other hardwood',]
+Other.hardwood = Other.hardwood[which(Other.hardwood$diameter < 88888),]
+hist(Other.hardwood$diameter, breaks = 15)
+
+Pine = combined[combined$L3_tree == 'Pine',]
+Pine = Pine[which(Pine$diameter < 88888),]
+hist(Pine$diameter, breaks = 15)
+
+Poplar = combined[combined$L3_tree == 'Poplar',]
+Poplar = Poplar[which(Poplar$diameter < 88888),]
+hist(Poplar$diameter, breaks = 15)
+
+Poplar.Tulippoplar = combined[combined$L3_tree == 'Poplar/tulip poplar',]
+Poplar.Tulippoplar = Poplar.Tulippoplar[which(Poplar.Tulippoplar$diameter < 88888),]
+hist(Poplar.Tulippoplar$diameter, breaks = 15)
+
+Swgum = combined[combined$L3_tree == 'Sweet gum',]
+Swgum = Swgum[which(Swgum$diameter < 88888),]
+hist(Swgum$diameter, breaks = 15)
+
+Sycamore = combined[combined$L3_tree == 'Sycamore',]
+Sycamore = Sycamore[which(Sycamore$diameter < 88888),]
+hist(Sycamore$diameter, breaks = 15)
+
+Tamarack = combined[combined$L3_tree == 'Tamarack',]
+Tamarack = Tamarack[which(Tamarack$diameter < 88888),]
+hist(Tamarack$diameter, breaks = 15)
 
 Tulip.poplar = combined[combined$L3_tree == 'Tulip poplar',]
 Tulip.poplar = Tulip.poplar[which(Tulip.poplar$diameter < 88888),]
 hist(Tulip.poplar$diameter, breaks = 15)
+
+Unknown = combined[combined$L3_tree == 'Unknown tree',]
+Unknown = Unknown[which(Unknown$diameter < 88888),]
+hist(Unknown$diameter, breaks = 15)
+
+Walnut = combined[combined$L3_tree == 'Walnut',]
+Walnut = Walnut[which(Walnut$diameter < 88888),]
+hist(Walnut$diameter, breaks = 15)
 
 Willow = combined[combined$L3_tree == 'Willow',]
 Willow = Willow[which(Willow$diameter < 88888),]
