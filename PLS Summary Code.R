@@ -1270,7 +1270,7 @@ write.csv(conversiontable, file = "./MIconversion_v1.0_5-3-19.csv", row.names = 
 rm(list=ls())
 state = read.csv("southernMI_Detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
 
 newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),] #removes Water, Wet, No data, 
 #and No tree entries so only entries with trees are included in the new dataframe
@@ -1304,7 +1304,7 @@ colnames(L3tree.names) = c("L3_tree")
 L3tree.names
 
 #select individual taxa
-Alder = combined[combined$L3_tree == 'Alder',]
+Alder = combined[combined$L3_tree == 'Alder',] #there is no Alder in Illinois
 Alder = Alder[which(Alder$diameter < 88888),]
 hist(Alder$diameter, breaks = 15)
 
@@ -1348,7 +1348,7 @@ Cherry = combined[combined$L3_tree == 'Cherry',]
 Cherry = Cherry[which(Cherry$diameter < 88888),]
 hist(Cherry$diameter, breaks = 15)
 
-Chestnut = combined[combined$L3_tree == 'Chestnut',]
+Chestnut = combined[combined$L3_tree == 'Chestnut',] #there is no Chestnut in Illinois
 Chestnut = Chestnut[which(Chestnut$diameter < 88888),]
 hist(Chestnut$diameter, breaks = 15)
 
@@ -1359,18 +1359,21 @@ hist(Dogwood$diameter, breaks = 15)
 Elm = combined[combined$L3_tree == 'Elm',]
 Elm = Elm[which(Elm$diameter < 88888),]
 hist(Elm$diameter, breaks = 15)
+View(Elm) #IL v2.0 has a 96 inch elm, which the notes were double checked and it is 96 inches.
+
 
 Hackberry = combined[combined$L3_tree == 'Hackberry',]
 Hackberry = Hackberry[which(Hackberry$diameter < 88888),]
 hist(Hackberry$diameter, breaks = 15)
 
-Hemlock = combined[combined$L3_tree == 'Hemlock',]
+Hemlock = combined[combined$L3_tree == 'Hemlock',] #there is no hemlock in Illinois
 Hemlock = Hemlock[which(Hemlock$diameter < 88888),]
 hist(Hemlock$diameter, breaks = 15)
 
 Hickory = combined[combined$L3_tree == 'Hickory',]
 Hickory = Hickory[which(Hickory$diameter < 88888),]
 hist(Hickory$diameter, breaks = 15)
+View(Hickory) #IL v2.0 has a number of large hickories which have been double checked
 
 Ironwood = combined[combined$L3_tree == 'Ironwood',]
 Ironwood = Ironwood[which(Ironwood$diameter < 88888),]
@@ -1392,6 +1395,7 @@ hist(Mulberry$diameter, breaks = 15)
 Oak = combined[combined$L3_tree == 'Oak',]
 Oak = Oak[which(Oak$diameter < 88888),]
 hist(Oak$diameter, breaks = 15)
+View(Oak) #IL v2.0 has a number of large oaks which have been checked
 
 Other.hardwood = combined[combined$L3_tree == 'Other hardwood',]
 Other.hardwood = Other.hardwood[which(Other.hardwood$diameter < 88888),]
@@ -1417,7 +1421,7 @@ Sycamore = combined[combined$L3_tree == 'Sycamore',]
 Sycamore = Sycamore[which(Sycamore$diameter < 88888),]
 hist(Sycamore$diameter, breaks = 15)
 
-Tamarack = combined[combined$L3_tree == 'Tamarack',]
+Tamarack = combined[combined$L3_tree == 'Tamarack',] #there is no tamarack in Illinois
 Tamarack = Tamarack[which(Tamarack$diameter < 88888),]
 hist(Tamarack$diameter, breaks = 15)
 
