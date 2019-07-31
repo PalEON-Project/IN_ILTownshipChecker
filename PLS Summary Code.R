@@ -51,12 +51,12 @@ rm(list=ls())
 
 #labeled both IL and IN files as "state" object so that I didn't need to create code for each state separately.
 #I originally had the code read: IL = read.csv(ndilpls_vX.X.csv") or IN = read.csv(ndinpls_vX.X.csv"), but switched to the following
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/In PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("southernMI_Detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 
-#65957 records in Illinois version 1.9, 57311 records in Illinois version 1.8-1
+#71007 records in Illinois version 2.0 65957 records in Illinois version 1.9, 57311 records in Illinois version 1.8-1
 #69042 records in Indiana version 2.0,63355 records in Indiana version 1.8, 57065 records in Indiana version 1.7
 #Indiana version numbers skip from 1.8 to 2.0 because Jody screwed up the numbering system and followed IL's v1.9
 #2540 records in Michigan v1.0
@@ -66,6 +66,7 @@ newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
 #just for fun select only the Water, Wet, No data and No tree entries and make sure that the total for
 #nontreestate and newstate equals the total entries for each state
 nontreestate <- state[(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
+#ILv2.0: nontreeIL = 35048, newIL = 35959. IL=71007. They match! 
 #ILv1.9: nontreeIL = 32258, newIL = 33699. IL=65957. They match! 
 #ILv1.8-1: nontreeIL = 29007, newIL = 28304, IL = 57311. They match!
 #INv2.0: nontreeIN = 8076, newIN = 60965, IN = 69041. They match! 
@@ -83,6 +84,7 @@ View(nontreecounts)
 #In IN v2.0: 859 No data, 5755 No tree, 1438 Water and 24 Wet entries
 #In IN v1.8: 787 No data, 5686 No tree, 1348 Water and 23 Wet entries
 #In IN v1.7: 689 No data, 5595 No tree, 1295 Water and 23 Wet entries
+#In IL v2.0: 1684 No data, 32595 No tree, 732 Water and 37 Wet entries
 #In IL v1.9: 1396 No data, 30136 No tree, 689 Water and 37 Wet entries
 #In IL v1.8-2: 1300 No data, 27045 No tree, 625 Water and 37 Wet entries
 #In MI v1.0: 26 No data, 69 No tree, 36 Water and 9 Wet entries
@@ -163,6 +165,7 @@ View(temp4)
 #remove entries with NANANANA(IL) or NANA NA NA(IN) from tree 2 before you compare it to tree 1
 temporary.2 <- temporary[!(temporary$uniquetree2 %in% c("NANANANA")),]
 temporary.2 <- temporary[!(temporary$uniquetree2 %in% c("NANA NA NA")),]
+temporary.2 <- temporary.2[!(temporary.2$uniquetree2 %in% c("NANANANANANA")),]
 #TREE1 vs TREE2
 #compare TREE1 vs TREE2 - these will have the greatest chance of having duplicates
 tree1_vs_tree2 = 1:length(temporary.2$uniquetree1)
@@ -247,7 +250,11 @@ newstate$masteruniquetree = masteruniquetree
 uniquetemporary = newstate[,c("TRP","page","entry_id","reader_initials","hubtack_county","cornerid","masteruniquetree", "generalnotes")]
 
 #remove entries that are duplicates because they are corner trees or because we already know they are duplicates
+#I created the "state_duplicate_cornertrees_translationcorners.csv"s so I don't have to re-check corners that have 
+#previously checked. This is the list of corners that are either corner trees or have the same tree information, but
+#when checked in the notes are listed with the same tree for two different corners. I expect that these corners with the
 duplicatecorners = read.csv("./Indiana/IN PLS for Modelers/in_duplicate_cornertrees_translationcorners.csv", stringsAsFactors = FALSE, header = TRUE)
+duplicatecorners = read.csv("./Illinois/IL PLS for Modelers/il_duplicate_cornertrees_translationcorners.csv", stringsAsFactors = FALSE, header = TRUE)
 cornertrees = duplicatecorners[which(duplicatecorners$status == "cornertree"),]
 translationtrees = duplicatecorners[which(duplicatecorners$status == "duplicate due to translation mistake"),]
 uniquetemporary <- uniquetemporary %>% filter(!entry_id %in% cornertrees$entry_id)
@@ -267,7 +274,7 @@ length(uniquecount) == length(uniquetemporary$masteruniquetree) #needs to say TR
 # If the above says "FALSE" find the duplicated masteruniquetrees
 uniquedups <-uniquetemporary[duplicated(uniquetemporary$masteruniquetree)|duplicated(uniquetemporary$masteruniquetree, fromLast=TRUE),]
 uniquedups2 = uniquedups[order(uniquedups$masteruniquetree),] 
-write.csv(uniquedups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/uniquetree_duplicates_v1.9-2.csv", row.names = FALSE)
+write.csv(uniquedups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/uniquetree_duplicates_v2.0.csv", row.names = FALSE)
 write.csv(uniquedups2, file = "./Indiana/IN PLS for Modelers/In PLS_v2.0/QA_QC Output/uniquetree_duplicates_vIN2.0.csv", row.names = FALSE)
 write.csv(uniquedups2, file = "./uniquetree_duplicates_MIv1.0_take2.csv", row.names = FALSE)
 
@@ -279,7 +286,7 @@ write.csv(uniquedups2, file = "./uniquetree_duplicates_MIv1.0_take2.csv", row.na
 library(plyr)
 L1tree1.species <- ddply(newstate, .(newstate$species, newstate$L1_tree1), nrow)
 L1tree1.species
-write.csv(L1tree1.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree1-species.csv", row.names = FALSE)
+write.csv(L1tree1.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree1-species.csv", row.names = FALSE)
 write.csv(L1tree1.species, file = "./Indiana/IN PLS for Modelers/In PLS_v2.0/QA_QC Output/IN2.0_L1tree-species.csv", row.names = FALSE)
 write.csv(L1tree1.species, file = "./MIv1.0_L1tree-species.csv", row.names = FALSE)
 #check L1_tree1 and species1 that do not match
@@ -289,7 +296,7 @@ newstate[which(newstate$L1_tree1 == "blue ash"),]
 #TREE2
 L1tree2.species <- ddply(newstate, .(newstate$species2, newstate$L1_tree2), nrow)
 L1tree2.species
-write.csv(L1tree2.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree2-species.csv", row.names = FALSE)
+write.csv(L1tree2.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree2-species.csv", row.names = FALSE)
 write.csv(L1tree2.species, file = "./Indiana/IN PLS for Modelers/In PLS_v2.0/QA_QC Output/IN2.0_L2tree-species.csv", row.names = FALSE)
 write.csv(L1tree2.species, file = "./MIv1.0_L2tree-species.csv", row.names = FALSE)
 #check L1_tree2 and species2 that do not match
@@ -299,7 +306,7 @@ newstate[which(newstate$L1_tree2 == "buckhorn"),]
 #TREE3
 L1tree3.species <- ddply(newstate, .(newstate$species3, newstate$L1_tree3), nrow)
 L1tree3.species
-write.csv(L1tree3.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree3-species.csv", row.names = FALSE)
+write.csv(L1tree3.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree3-species.csv", row.names = FALSE)
 write.csv(L1tree3.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L3tree-species.csv", row.names = FALSE)
 #check L1_tree3 and species3 that do not match
 newstate[which(newstate$L1_tree3 == "blue ash"),]
@@ -308,7 +315,7 @@ newstate[which(newstate$L1_tree3 == "blue ash"),]
 #TREE4
 L1tree4.species <- ddply(newstate, .(newstate$species4, newstate$L1_tree4), nrow)
 L1tree4.species
-write.csv(L1tree4.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree4-species.csv", row.names = FALSE)
+write.csv(L1tree4.species, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree4-species.csv", row.names = FALSE)
 write.csv(L1tree4.species, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L4tree-species.csv", row.names = FALSE)
 #check L1_tree4 and species4 that do not match
 newstate[which(newstate$L1_tree4 == "blue ash"),]
@@ -319,7 +326,7 @@ newstate[which(newstate$L1_tree4 == "blue ash"),]
 ##############################################
 rm(list=ls())
 
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
 
 newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
@@ -329,7 +336,7 @@ nontreestate <- state[(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")
 library(plyr)
 L1tree1.L3tree1 <- ddply(newstate, .(newstate$L3_tree1, newstate$L1_tree1), nrow)
 L1tree1.L3tree1
-write.csv(L1tree1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree1-L3tree1.csv", row.names = FALSE)
+write.csv(L1tree1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree1-L3tree1.csv", row.names = FALSE)
 write.csv(L1tree1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L1tree1-L3tree1.csv", row.names = FALSE)
 write.csv(L1tree1.L3tree1, file = "./MI_v1.0_L1tree1-L3tree1.csv", row.names = FALSE)
 #check L1_tree1 and L3_tree1 that do not match
@@ -339,7 +346,7 @@ trees[which(trees$L1_tree1 == "blue ash"),]
 #TREE2
 L1tree2.L3tree2 <- ddply(newstate, .(newstate$L3_tree2, newstate$L1_tree2), nrow)
 L1tree2.L3tree2
-write.csv(L1tree2.L3tree2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree2-L3tree2.csv", row.names = FALSE)
+write.csv(L1tree2.L3tree2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree2-L3tree2.csv", row.names = FALSE)
 write.csv(L1tree2.L3tree2, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L1tree2-L3tree2.csv", row.names = FALSE)
 write.csv(L1tree2.L3tree2, file = "./MI_v1.0_L1tree2-L3tree2.csv", row.names = FALSE)
 #check L1_tree2 and L3_tree2 that do not match
@@ -349,7 +356,7 @@ trees[which(trees$L1_tree2 == "blue ash"),]
 #TREE3
 L1tree3.L3tree3 <- ddply(newstate, .(newstate$L3_tree3, newstate$L1_tree3), nrow)
 L1tree3.L3tree3
-write.csv(L1tree3.L3tree3, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree3-L3tree3.csv", row.names = FALSE)
+write.csv(L1tree3.L3tree3, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree3-L3tree3.csv", row.names = FALSE)
 write.csv(L1tree3.L3tree3, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L1tree3-L3tree3.csv", row.names = FALSE)
 #check L1_tree3 and L3_tree3 that do not match
 trees[which(trees$L1_tree3 == "blue ash"),]
@@ -358,7 +365,7 @@ trees[which(trees$L1_tree3 == "blue ash"),]
 #TREE4
 L1tree4.L3tree4 <- ddply(newstate, .(newstate$L3_tree4, newstate$L1_tree4), nrow)
 L1tree4.L3tree4
-write.csv(L1tree4.L3tree4, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree4-L3tree4.csv", row.names = FALSE)
+write.csv(L1tree4.L3tree4, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1tree4-L3tree4.csv", row.names = FALSE)
 write.csv(L1tree4.L3tree4, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L1tree4-L3tree4.csv", row.names = FALSE)
 #check L1_tree4 and L3_tree4 that do not match
 trees[which(trees$L1_tree4 == "blue ash"),]
@@ -392,13 +399,20 @@ library(dplyr)
 L1.L3combined = combined %>% group_by(L3_tree,L1_tree) %>% tally()
 
 write.csv(L1.L3combined, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L1-L3trees_summary.csv", row.names = FALSE)
-write.csv(L1.L3combined, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1-L3trees_summary.csv", row.names = FALSE)
+write.csv(L1.L3combined, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/IL2.0_L1-L3trees_summary.csv", row.names = FALSE)
 write.csv(L1.L3combined, file = "./MI_v1.0_L1-L3trees_summary.csv", row.names = FALSE)
 
 ######################################
 ### Check for Duplicate X,Y points ###
 ######################################
-
+rm(list=ls())
+options(digits = 12)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
+#remove Water, Wet, No data, and No tree entries so only entries with trees are included in the new dataframe
+newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
+#nontreestate and newstate equals the total entries for each state
+nontreestate <- state[(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
 
 #Check for duplicates in the point x values
 cornersPointXcount = unique(state$x)
@@ -415,7 +429,7 @@ xdups <-state[duplicated(state$x)|duplicated(state$x, fromLast=TRUE),]
 xdups
 xdups2 = xdups[order(xdups$x),]
 write.csv(xdups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/x_duplicates.csv", row.names = FALSE)
-write.csv(xdups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/x_duplicates.csv", row.names = FALSE)
+write.csv(xdups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/x_duplicates.csv", row.names = FALSE)
 xdups2 = xdups[order(xdups$entry_id),]#use this after you have corrected the duplicated xs. 
 xdups2[,1:5] #you can compare the corners thave have duplicate xs, but different ys that are supposed to be like that.
 
@@ -424,6 +438,7 @@ xdups2[,1:5] #you can compare the corners thave have duplicate xs, but different
 #for IN v1.7 there are 12 corners (6 pairs) with the same x coordinates but different y coordinates
 #for IL v1.8-2 there are 2 corners (1 pair) with the same x coordinates but different y coordinates
 #for IL v1.9 there are 2 corners (1 pair) with the same x coordinates but different y coordinates
+#for IL v2.0 there are 2 corners (1 pair) with the same x coordinates but different y coordinates
 
 write.csv(xdups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/x_duplicates.csv", row.names = FALSE)
 write.csv(xdups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC Output/x_duplicates.csv", row.names = FALSE)
@@ -444,6 +459,7 @@ ydups2[,1:29]
 #for IN v1.7 there are 4 corners (2 pairs) with the same y coordinates but different x coordinates
 #for IL v1.8-2 there are no corners with different y coordinates
 #for IL v1.9 there are no corners with different y coordinates
+#for IL v2.0 there are no corners with different y coordinates
 write.csv(ydups2, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/y_duplicates.csv", row.names = FALSE)
 write.csv(ydups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/y_duplicates.csv", row.names = FALSE)
 
@@ -488,7 +504,7 @@ setdiff(bearing2$Var1, bearing.combo$ComboName) #bearing2 values that are NOT in
 setdiff(bearing.combo$ComboName, bearing2$Var1) #this is less important, but nice for a check
 #it is the bearing.combo values that are NOT in the bearing2 list
 #find the bearing/bearingdir combination that is not in the list
-newstate[which(newstate$b2.check == "9999988888"),]
+newstate[which(newstate$b2.check == "NAW"),]
 #"DoE" "NAW"    "W99999"
 #IN v2.0 there is one corner, entryid: 658929, that say "W99999". It was written in the notes "bears W _", left it as "W99999"
 
@@ -528,6 +544,7 @@ entryid.state <- state$entry_id
 #just for fun select only entries with 0 and NA for the entry_ids and make sure that the total for
 #nonentryid.state and entryid.state equals the total entries for state
 nonentryid.state <- state[(state$entry_id %in% c(0,NA)),]
+#nonentryid.ILv2.0 = 249, entryid.IL = 70758, IL = 71007. They match!
 #nonentryid.IL = 249, entryid.IL = 65708, IL = 65957. They match!
 #nonentryid.IL = 249, entryid.IL = 57062, IL = 57311. They match!
 #nonentryid.IN = 1459, entryid.IN = 55606, IN = 57065. They match!
@@ -553,7 +570,7 @@ write.csv(entryid.dups2, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.7/QA_QC
 #can use code below, but may be easier to sort in excel and find if there are any missing at the bottom
 
 rm(list=ls())
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("southernMI_Detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 
@@ -637,6 +654,9 @@ versioncount = state %>% group_by(version) %>% tally()
 versioncount
 
 sum(versioncount$n)
+#NOTE that for IL v2.0 the version numbers are: 
+#0, 1.1, 1.6, 1.7, 1.8, 1.9, and 2.  The 1.1 version data are actually combined with the 2 data since it was 
+#listed as 1.10 for awhile before we realized that it needed to be 2.
 
 
 ####################################################################
@@ -645,6 +665,7 @@ sum(versioncount$n)
 
 watercheck <- state[(state$water %in% c("Water","Wet","water","wet")),]
 nonwatercheck <- state[!(state$water %in% c("Water","Wet","water","wet")),]
+#ILv1.9 70238+769 = 71007. It matches!
 #ILv1.9 65231+726 = 65957. It matches!
 #ILv1.8 56649+662 =57311. It matches!
 #INv1.7 1318 + 55747 = 57065. It matches!
@@ -660,47 +681,49 @@ write.csv(watercheck[order(watercheck$L3_tree1),], file = "./water_check.csv", r
 #### Summary Code to Use for ReadMe File                ########
 ################################################################
 rm(list=ls())
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/ndilpls_v1.8-2/ndilpls_v1.8-2.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("southernMI_Detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 
 readers = as.data.frame(state$reader_initials)
 colnames(readers) = "reader_initials"
-reader_name = vector(mode = "character", length = 69041) #length == the number of observations for "readers"
+View(table(readers))#use this to see if there are any names that need to be added to the IL_Readers.csv or IN_Readers.csv
+
+#add column to readers table to change the reader_initiatls from netids to Names using the following code
+reader_name = vector(mode = "character", length = 71007) #MAKE SURE THAT length == the number of observations for "readers"
 readers$reader_name = reader_name
+
 reader.conversion = read.csv("./Indiana/IN PLS for Modelers/IN_Readers.csv",header = TRUE, stringsAsFactors = FALSE)
+reader.conversion = read.csv("./Illinois/IL PLS for Modelers/IL_Readers.csv",header = TRUE, stringsAsFactors = FALSE)
+
+#for loop to add the reader names to the table
 for(i in 1:length(readers$reader_name)){
     readers$reader_name[i] = reader.conversion[match(readers$reader_initials[i], reader.conversion$reader_intiatials, nomatch = NA),2]
   }
 
-
-
+#get a table of readers
 reader.table = as.data.frame(sort(table(readers$reader_name)))
 reader.table
 sum(reader.table$Freq)
+View(readers)
 
-
-write.csv(reader.table, "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/reader_summary.csv", row.names = FALSE)
+write.csv(reader.table, "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/reader_summary.csv", row.names = FALSE)
 write.csv(reader.table, "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/reader_summary.csv", row.names = FALSE)
 #make sure all the readers are included in the ReadMe
 
-#version IL 1.8 reader names
-reader.table$ILnames = c("Kate Augustine", "Kim Bauer","Garret Blad","Caitlin Broderick","Briget Bruns","Amanda Buerger","William Chronister","Jaclyn Cooney","Margaret Corcoran",
-"Mariel Cuellar","Jill Deines","Isaac Evans","Nicole Fantozzi","Benjamine Foster","Quercus Hamlin","Annie Han","Alec Helmke","Da Som Kim","Marissa Kivi","Hannah Legatzke",
-"Anna Levesque","Claire Mattison","Emily Mears","Nicole Micelotta","Emily Miller","Michelle Mueller","Alex Muench","Erin Nguyen","Rebecca O'Neil","Luke Onken",
-"Sam Pecoraro","Jody Peters","Kaitlin Powers","Grace Saalman","Michael Spoltore","Will Tintor","Zoe Volonec","Christina Wiech")
-
 
 length(reader.table$Var1)
+#39 students & Jody and Jill entered data for Illinois in version 2.0
 #38 students & Jody and Jill entered data for Illinois in version 1.9
 #35 students & Jody and Jill entered data for Illinois in version 1.8
-#31 students & Jody and Morton entered data for Indiana in version 2.0
+#33 students & Jody and Morton entered data for Indiana in version 2.0
 
 #number of corners 
 #you can get the number of corners by the total number of observations in the file
 #IN_v2.0 has 69041 corners total
 #IN_v1.8 has 63355 corners total
 #IN_v1.7 has 57065 corners total
+#IL_v1.9 has 71007 corners total
 #IL_v1.9 has 65957 corners total
 #IL_v1.8-2 has 57311 corners total
 #MI_v1.0 has 2540 corners total
@@ -711,6 +734,7 @@ newstate <- state[!(state$L3_tree1 %in% c("Water","Wet","No data", "No tree")),]
 #IN_v2.0 has 60965 corners with trees
 #IN_v1.8 has 55511 corners with trees
 #IN_v1.7 has 49463 corners with trees
+#IL_v1.9 has 35959 corners with trees
 #IL_v1.9 has 33699 corners with trees
 #IL_v1.8-2 has 28304 corners with trees
 #MI_v1.0 has 2400 corners with trees
@@ -732,6 +756,7 @@ tree.sum.df
 #IN_v2.0 has 119842 trees
 #IN_v1.8 has 108981 trees
 #IN_v1.7 has 97163 trees
+#IL_v2.0 has 69354 trees
 #IL_v1.9 has 65399 trees
 #IL_v1.8-2 has 54552 trees
 #MI_v1.0 has 4673 trees
@@ -745,14 +770,15 @@ year.table2
 #plot of number of records surveyed in each year. MAKE SURE TO SAVE THIS PLOT IN THE RIGHT DIRECTORY
 library(ggplot2)
 year = ggplot(year.table, aes(Var1,Freq))+geom_bar(stat="identity")+theme_minimal()+ylab("Count")+theme(axis.title.x=element_blank(), axis.text.x = element_text(angle = 90, hjust = 1))
-#png(paste("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/Count of Surveyor Year.png", sep = " "),   height = 768, width=1024)
-png(paste("./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/Count of Surveyor Year.png", sep = " "),   height = 768, width=1024)
+png(paste("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/Count of Surveyor Year.png", sep = " "),   height = 768, width=1024)
+#png(paste("./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/Count of Surveyor Year.png", sep = " "),   height = 768, width=1024)
 year
 dev.off()
 
 
 length(unique(state$TRP))
-#Data came from 641 townships for Illinois in version 1.8
+#Data came from 688 townships for Illinois in version 2.0
+#Data came from 641 townships for Illinois in version 1.9
 #Data came from 559 townships for Illinois in version 1.8
 #Data came from 561 townships for Indiana in version 1.7
 #Data came from 620 townships for Indiana in version 1.8
@@ -768,7 +794,7 @@ histinfo = hist(TRP.table$Freq, breaks = 100, xlim=range(1:115))
 histinfo
 
 #Histogram of the number of PLS corners for each township. MAKE SURE TO SAVE THE PLOT TO THE RIGHT DIRECTORY!
-#png(paste("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/TRP Corner Counts.png", sep = " "),   height = 768, width=1024)
+png(paste("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/TRP Corner Counts.png", sep = " "),   height = 768, width=1024)
 png(paste("./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/TRP Corner Counts.png", sep = " "),   height = 768, width=1024)
 hist(TRP.table$Freq, breaks = 100, xlim=c(1,115), xaxt='n',xlab = "Number of PLS Corners", main = "Histogram of TRP Corner \nMajority of Counts should be in the 107-110 range ",las=1)
 axis(side=1, at=seq(0,115,5), labels=seq(0,115,5))
@@ -778,43 +804,46 @@ dev.off()
 
 #gives a summary of the number of corners to check out townships with min and max 
 summary(TRP.table$Freq) 
-#for IL version 1.8 shows 1 township has 3 corners and 1 township has 112 corners.
+#for IL version 1.8/1.9/2.0 shows 1 township has 3 corners and 1 township has 112 corners.
 #for INv1.7/INv1.8/INv2.0 version  shows 1 township has min = 1. 
 #INv1.8/INv2.0 has max 110 corners
 TRP.table[which(TRP.table$Freq == 3),]
-#for IL version 1.8 the township with 3 corners is 26N10W2 - this is a sliver township on the border of Indiana. It is fine.
+#for IL version 1.8/1.9/2.0 the township with 3 corners is 26N10W2 - this is a sliver township on the border with Indiana. It is fine.
 #for IN version 1.7 the township with 1 corner is 38N10W2 - it is 1 section at the far northwest border of Indiana with Illinois. It is fine.
 #for MI version 1.0 the township with 7 corners is 6S8E0 - it is a township with a majority that was previously settled
 TRP.table[which(TRP.table$Freq == 112),]
-#for IL version 1.8 the township with 112 corners is 17N11W2 - this is a strangely shapped township with an extra protrusion to the south which included
+#for IL version 1.8/1.9/2.0 the township with 112 corners is 17N11W2 - this is a strangely shapped township with an extra protrusion to the south which included
 #extra corners.  It is fine.
 
 #############################################
 ####### Version Number Counts ###############
 #############################################
 
-#each version of IL are listed first, then IN versions below them
+###NOTE: each version of IL are listed first, then IN versions below them
 
 ######################################
-####### IL VERSION 1.9 ###############
+####### IL VERSION 2.0 ###############
 ######################################
 
-#number of townships added for IL version 1.8
+#number of townships added for IL version 2.0
 v1.8 = table(state$TRP,state$version)
 v1.8db = as.data.frame(v1.8)
-View(v1.8db)
 colnames(v1.8db) = c("TRP", "version","corners")
-head(v1.8db)
 
 sorted = v1.8db[order(v1.8db$version,v1.8db$corners),]
-head(sorted)
-tail(sorted)
 
 sort2 <- subset(sorted, corners > 0, select=c(TRP,version,corners))
-View(sort2)
 
 unique(sort2$version) 
-#unique IL version values: 0, 1.6, 1.7, 1.8, 1.9
+#unique IL version values: 0, 1.1, 1.6, 1.7, 1.8, 1.9, 2.0 
+#version 1.1 is actually version 1.10.  Realized after entering a number of townships as version 1.10 that they should
+#be version 2.0 to follow 1.9.
+
+version2.0 = subset(sort2,version == 1.1|version == 2, select=c(TRP,version,corners))
+View(version2.0[order(version2.0$TRP),])
+version2.0$TRP
+length(version2.0$TRP)
+#47 version 2.0 (and 1.1) townships
 
 version1.9 = subset(sort2,version == 1.9, select=c(TRP,version,corners))
 View(version1.9[order(version1.9$TRP),])
@@ -844,7 +873,8 @@ View(version0)
 version0$TRP
 #315 version 0 townships
 
-#The total number of townships in version 1.9 is 641.
+#The total number of townships in version 2 is 688. There were no townships with additional corners added for version 2.
+#The total number of townships in version 1.9 is 641. There were no townships with additional corners added for version 1.9.
 #The total number of townships in the version 1.8 data is 559. 
 #But if you add up the number of townships in each individual version
 #v1.8=23, v1.7=109, v1.6=114, v0=315...  315+114+109+23 = 561
@@ -855,7 +885,6 @@ version0$TRP
 # 5N12W2 had the township corner 700700 entered in v1.7 and the rest of the township was entered in v1.6
 #the 700700 corner was entered as no data because we had all 3 bordering townships entered in v1.7 and 
 #found that there was no data for 5N12W2 corner 700700 in any of the 3 townships.
-
 
 
 
@@ -925,7 +954,7 @@ version1.8$TRP
 #### Diameter, Degree, and Distance(Links) Checks ########
 ##########################################################
 rm(list=ls())
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("southernMI_Detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 
@@ -943,11 +972,11 @@ library(dplyr)
 #tree1 diameter
 diameter1 = as.data.frame(table(state$diameter)) 
 diameter1 #scroll through the diameters looking for small or large weird values.
-state[which(state$diameter == 1.5),]
+state[which(state$diameter == 12.5),]
 state[which(state$diameter == 1),]
 diameter.check = as.data.frame(state[which(state$diameter >= 60 & state$diameter < 88888),c(1,5,7,10,20,21,22,23,29,35,85,86,87,88)])
-diameter.check2 = as.data.frame(state[which(state$diameter < 3),c(1,5,7,10,20,21,22,23,29,35,85,86,87,88)])
 View(diameter.check)
+diameter.check2 = as.data.frame(state[which(state$diameter < 3),c(1,5,7,10,20,21,22,23,29,35,85,86,87,88)])
 View(diameter.check2)
 diameter.check3 = rbind(diameter.check, diameter.check2)
 write.csv(diameter.check3[order(diameter.check3$diameter),], file = "./Indiana/IN PLS for Modelers/IN PLS_v1.8/QA_QC Output/diameter1_check.csv", row.names = FALSE)
@@ -956,11 +985,11 @@ write.csv(diameter.check3[order(diameter.check3$diameter),], file = "./Indiana/I
 #tree2 diameter
 diameter2 = as.data.frame(table(state$diameter2)) 
 diameter2 #scroll through the diameters looking for small or large weird values.
-state[which(state$diameter2 == 1.5),]
+state[which(state$diameter2 == 3.5),]
 state[which(state$diameter2 == 1),]
 diameter2.check = as.data.frame(state[which(state$diameter2 >= 60 & state$diameter2 < 88888),c(1,5,7,10,20,21,22,23,29,45,85,86,87,88)])
-diameter2.check2 = as.data.frame(state[which(state$diameter2 < 3),c(1,5,7,10,20,21,22,23,29,45,85,86,87,88)])
 View(diameter2.check)
+diameter2.check2 = as.data.frame(state[which(state$diameter2 < 3),c(1,5,7,10,20,21,22,23,29,45,85,86,87,88)])
 View(diameter2.check2)
 diameter2.check3 = rbind(diameter2.check, diameter2.check2)
 write.csv(diameter2.check3[order(diameter2.check3$diameter2),], file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/diameter2_check.csv", row.names = FALSE)
@@ -971,23 +1000,25 @@ diameter3 = as.data.frame(table(state$diameter3)) #scroll through the diameters 
 diameter3 #scroll through the diameters looking for small or large weird values.
 diameter3.check = as.data.frame(state[which(state$diameter3 >= 60 & state$diameter3 < 88888),c(1,5,7,10,20,21,22,23,29,55,85,86,87,88)])
 diameter3.check3 = as.data.frame(state[which(state$diameter3 < 3),c(1,5,7,10,20,21,22,23,29,55,85,86,87,88)])
+View(diameter3.check3)
 diameter3.check4 = rbind(diameter3.check, diameter3.check3)
 write.csv(diameter3.check4[order(diameter3.check4$diameter3),], file = "./Indiana/IN PLS for Modelers/IN PLS_v1.8/QA_QC Output/diameter3_check.csv", row.names = FALSE)
-#for v1.8 and v2.0 there are no tree3 diameters that are <3 or >=60 inches
-
+#for IN v1.8 and v2.0 there are no tree3 diameters that are <3 or >=60 inches
+#for IL v2.0 there are no tree3 diameters that >=60 inches
 
 #tree4 diameter
 diameter4 = as.data.frame(table(state$diameter4)) #scroll through the diameters looking for small or large weird values.
 diameter4
 diameter.check4 = as.data.frame(state[which(state$diameter4 >= 60 & state$diameter4 < 88888),c(1,5,7,10,20,21,22,23,29,65,85,86,87,88)])
 write.csv(diameter.check4[order(diameter.check4$diameter4),], file = "./Indiana/IN PLS for Modelers/IN PLS_v1.8/QA_QC Output/diameter4_check.csv", row.names = FALSE)
-#for v1.8 and v2.0 there are no tree4 diameters that are <3 or >=60 inches
+#for IN v1.8 and v2.0 there are no tree4 diameters that are <3 or >=60 inches
+#for IL v2.0 there are no tree4 diameters that are <3 or >=60 inches
 
 ####################
 #degree counts
 
 rm(list=ls())
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("southernMI_Detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 
@@ -1034,11 +1065,13 @@ state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_process
 state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
 
 #if there are any entries you want to check, use this to find them and double check that they have been double checked
-state[which(state$chainstree == "22.85"),]
+state[which(state$chainstree == "4780"),]
 
 #tree1 chainstree
 chainstree1 = as.data.frame(table(state$chainstree)) 
 colnames(chainstree1) = c("chainstree", "count")
+View(chainstree1)
+#IL v2.0 does have chainstree 4780.
 write.csv(chainstree1, "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/chainstree1.csv", row.names = FALSE)
 write.csv(chainstree1,"./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/chainstree1.csv", row.names = FALSE)
 
@@ -1046,6 +1079,7 @@ write.csv(chainstree1,"./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/c
 #tree2 chainstree
 chainstree2 = as.data.frame(table(state$chainstree2))
 colnames(chainstree2) = c("chainstree2", "count")
+View(chainstree2)
 write.csv(chainstree2, "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/chainstree2.csv", row.names = FALSE)
 write.csv(chainstree2,"./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/chainstree2.csv", row.names = FALSE)
 
@@ -1068,19 +1102,20 @@ write.csv(chainstree4, "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/c
 ###########################################################
 
 rm(list=ls())
-
-#ILLINOIS
+######################
+###### ILLINOIS ######
 #find the TRPs that are not in ndilpls or not in GIS
-#create the TRP_notduplicates.csv with a column for the GIS Township TRPs (you could also bring in the column with the Data Status label or the version number).
+#create the TRP_notduplicates.csv with a column for the GIS Township TRPs 
+#(you could also bring in the column with the Data Status label or the version number).
 #then add a column for the TRPs from the ndilpls file - you can get this by doing a pivot table and getting the TRPs/count of TRP
-TRP_notdups = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/TRP_notduplicates.csv", header = TRUE, stringsAsFactors = FALSE)
-NotInGIS = TRP_notdups$ndilpls_TRP[!(TRP_notdups$ndilpls_TRP %in% TRP_notdups$GIS_TRP)]
+TRP_notdups = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/TRP_not_duplicates.csv", header = TRUE, stringsAsFactors = FALSE)
+NotInGIS = TRP_notdups$ndilplsTRP[!(TRP_notdups$ndilplsTRP %in% TRP_notdups$GISTRP)]
 NotInGIS
 #This returned 40N1E3 and 39N1E3 which are in ndilpls but not in GIS. That is because the corners in this township are the west border corners and
 #are actually the east border of 22N11E4 in Ogle county.  So this is okay.
 #18N3E3 was also returned as being in ndilpls and not on the GIS map.  This had been marked on the map as 18N3E4. Corrected on GIS map.
 
-NotInndilpls = TRP_notdups$GIS_TRP[!(TRP_notdups$GIS_TRP %in% TRP_notdups$ndilpls_TRP)]
+NotInndilpls = TRP_notdups$GISTRP[!(TRP_notdups$GISTRP %in% TRP_notdups$ndilplsTRP)]
 NotInndilpls
 
 
@@ -1127,7 +1162,7 @@ rm(list=ls())
 setwd("C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected")
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.8/ndinpls_v1.8.csv", header = TRUE, stringsAsFactors = FALSE)
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9_inprogress.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9.csv", header = TRUE, stringsAsFactors = FALSE)
 state = read.csv("C:/Users/jmurray7/Dropbox/GIS PalEON/Michigan PLSS/Michigan Projected/Detroit Georeference/southernmi_detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 
@@ -1178,8 +1213,8 @@ L1.L3combined = combined %>% group_by(L3_tree,L1_tree) %>% tally()
 
 #join Level2 and Comments from the L0 to L3 conversion file.
 #read in the conversion file
-conversion = read.csv("C:/Users/jmurray7/Dropbox/PalEON2/Conversion Tables - Allometry, PEcAn, PLS, FIA/conversion files uploaded to wiki/level0_to_level3a_v0.7.csv",header = TRUE, stringsAsFactors = FALSE)
-conversion = read.csv("C:/Users/jmurray7/Dropbox/GIS PalEON/Section Georeferencing/R Code/level0_to_level3a_v0.9.csv",header = TRUE, stringsAsFactors = FALSE)
+conversion = read.csv("C:/Users/jmurray7/Dropbox/PalEON2/Conversion Tables - Allometry, PEcAn, PLS, FIA/conversion files uploaded to wiki/level0_to_level3a_v1.0.csv",header = TRUE, stringsAsFactors = FALSE)
+#conversion = read.csv("C:/Users/jmurray7/Dropbox/GIS PalEON/Section Georeferencing/R Code/level0_to_level3a_v0.9.csv",header = TRUE, stringsAsFactors = FALSE)
 #subset just the domain you want
 #use unique(conversion$domain) to find the name of the Domains
 ILconversion = conversion[which(conversion$domain == "Illinois_v1.9"),]
@@ -1225,7 +1260,7 @@ comments = MIconversion_merge$comments
 conversiontable = data.frame(cbind(level0,level1, level2, check, level3a, count, domain, comments), stringsAsFactors = FALSE)
 colnames(conversiontable) = c("level0","level1","level2","check","level3a","count","domain","comments")
 
-write.csv(conversiontable, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/ILconversion9_5-3-19.csv", row.names = FALSE)
+write.csv(conversiontable, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/ILconversion2.0_7-30-19.csv", row.names = FALSE)
 write.csv(conversiontable, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/INconversion_v2.07-26-19.csv", row.names = FALSE)
 write.csv(conversiontable, file = "./MIconversion_v1.0_5-3-19.csv", row.names = FALSE)
 
@@ -1340,6 +1375,7 @@ hist(Hickory$diameter, breaks = 15)
 Ironwood = combined[combined$L3_tree == 'Ironwood',]
 Ironwood = Ironwood[which(Ironwood$diameter < 88888),]
 hist(Ironwood$diameter, breaks = 15)
+#INv2.0 has an Ironwood that is 43 inches. JP checked the notes and it really does say 43 inches.
 
 Locust = combined[combined$L3_tree == 'Locust',]
 Locust = Locust[which(Locust$diameter < 88888),]
