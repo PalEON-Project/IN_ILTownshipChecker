@@ -1160,45 +1160,32 @@ NotIn_ndinpls
 #this was done above when the L1 & L3 trees were checked. But can use the code again here.
 rm(list=ls())
 setwd("C:/Users/jmurray7/Dropbox/GIS PalEON/IL_IN_WI Unprojected")
-state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0_processing.csv", header = TRUE, stringsAsFactors = FALSE)
-state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.8/ndinpls_v1.8.csv", header = TRUE, stringsAsFactors = FALSE)
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0_inprogressb.csv", header = TRUE, stringsAsFactors = FALSE)
-state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9.csv", header = TRUE, stringsAsFactors = FALSE)
-state = read.csv("C:/Users/jmurray7/Dropbox/GIS PalEON/Michigan PLSS/Michigan Projected/Detroit Georeference/southernmi_detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0.csv", header = TRUE, stringsAsFactors = FALSE)
+#state = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v1.8/ndinpls_v1.8.csv", header = TRUE, stringsAsFactors = FALSE)
+state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0.csv", header = TRUE, stringsAsFactors = FALSE)
+#state = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/ndilpls_v1.9.csv", header = TRUE, stringsAsFactors = FALSE)
+#state = read.csv("C:/Users/jmurray7/Dropbox/GIS PalEON/Michigan PLSS/Michigan Projected/Detroit Georeference/southernmi_detroit_projected_v1.0.csv", header = TRUE, stringsAsFactors = FALSE)
 
 
 #combine all the L1 and L3 trees, to get a table with counts of all 4 trees L1/L3 labels
 #select L1 & L3 of just tree1
 L1.L3tree1 = state[,c("L1_tree1","L3_tree1")]
 colnames(L1.L3tree1) = c("L1_tree", "L3_tree")
-#write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1tree1-L3tree1.csv", row.names = FALSE)
-#write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/QA_QC Output/IN2.0_L1tree1-L3tree1.csv", row.names = FALSE)
-#check L1_tree1 and L3_tree1 that do not match
-#state[which(trees$L1_tree1 == "blue ash"),]
-
 
 #select L1 & L3 of just tree2 and remove NAs
 L1.L3tree2 = state[,c("L1_tree2","L3_tree2")]
 L1.L3tree2 = L1.L3tree2[complete.cases(L1.L3tree2),]
 colnames(L1.L3tree2) = c("L1_tree", "L3_tree")
-#write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree2-L3tree2.csv", row.names = FALSE)
-#write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.8/QA_QC Output/IN1.8_L1tree2-L3tree2.csv", row.names = FALSE)
-
 
 #select L1 & L3 of just tree3 and remove NAs
 L1.L3tree3 = state[,c("L1_tree3","L3_tree3")]
 L1.L3tree3 = L1.L3tree3[complete.cases(L1.L3tree3),]
 colnames(L1.L3tree3) = c("L1_tree", "L3_tree")
-#write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree3-L3tree3.csv", row.names = FALSE)
-#write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.8/QA_QC Output/IN1.8_L1tree3-L3tree3.csv", row.names = FALSE)
-
 
 #select L1 & L3 of just tree4 and remove NAs
 L1.L3tree4= state[,c("L1_tree4","L3_tree4")]
 L1.L3tree4 = L1.L3tree4[complete.cases(L1.L3tree4),]
 colnames(L1.L3tree4) = c("L1_tree", "L3_tree")
-#write.csv(L1.L3tree1, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.8_6-6-17/QA_QC Output/IL1.8-1_L1tree4-L3tree4.csv", row.names = FALSE)
-#write.csv(L1.L3tree1, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.8/QA_QC Output/IN1.8_L1tree4-L3tree4.csv", row.names = FALSE)
 
 #combine all 4 L1&L3 trees
 combined = rbind(L1.L3tree1,L1.L3tree2,L1.L3tree3,L1.L3tree4)
@@ -1206,14 +1193,11 @@ combined = rbind(L1.L3tree1,L1.L3tree2,L1.L3tree3,L1.L3tree4)
 #create a table of the counts of L1 trees in the L3 categories
 library(dplyr)
 L1.L3combined = combined %>% group_by(L3_tree,L1_tree) %>% tally()
-
-#write.csv(L1.L3combined, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v1.9_4-4-19/QA_QC/IL1.9_L1-L3trees_summary_5-3-19.csv", row.names = FALSE)
-#write.csv(L1.L3combined, file = "./Indiana/IN PLS for Modelers/IN PLS_v1.8/QA_QC Output/IN1.8_L1-L3trees_summary2.csv", row.names = FALSE)
-#write.csv(L1.L3combined, file = "./MIv1.0_L1-L3trees_summary.csv", row.names = FALSE)
+View(L1.L3combined)
 
 #join Level2 and Comments from the L0 to L3 conversion file.
 #read in the conversion file
-conversion = read.csv("C:/Users/jmurray7/Dropbox/PalEON2/Conversion Tables - Allometry, PEcAn, PLS, FIA/conversion files uploaded to wiki/level0_to_level3a_v1.0.csv",header = TRUE, stringsAsFactors = FALSE)
+conversion = read.csv("C:/Users/jmurray7/Dropbox/PalEON2/Conversion Tables - Allometry, PEcAn, PLS, FIA/conversion files uploaded to wiki/level0_to_level3a_v0.9.csv",header = TRUE, stringsAsFactors = FALSE)
 #conversion = read.csv("C:/Users/jmurray7/Dropbox/GIS PalEON/Section Georeferencing/R Code/level0_to_level3a_v0.9.csv",header = TRUE, stringsAsFactors = FALSE)
 #subset just the domain you want
 #use unique(conversion$domain) to find the name of the Domains
@@ -1229,7 +1213,7 @@ MIconversion_merge = merge(x=L1.L3combined, y=MIconversion, by.x = "L1_tree", by
 #now the column headings are not in the same order as the IL conversion so we won't be able to seamlessly combine
 #the updated conversion data with the old conversione file. SO select each column and then join into a database
 #that is in the same order as the conversion file
-level0 = ILconversion_merge$level0
+level0 = ILconversion_merge$level0      #ILLINOIS!!
 level1 = ILconversion_merge$L1_tree
 level2 = ILconversion_merge$level2
 check = ILconversion_merge$check
@@ -1238,7 +1222,7 @@ count = ILconversion_merge$n
 domain = ILconversion_merge$domain
 comments = ILconversion_merge$comments
 
-level0 = INconversion_merge$level0
+level0 = INconversion_merge$level0      #INDIANA!!
 level1 = INconversion_merge$L1_tree
 level2 = INconversion_merge$level2
 check = INconversion_merge$check
@@ -1247,7 +1231,7 @@ count = INconversion_merge$n
 domain = INconversion_merge$domain
 comments = INconversion_merge$comments
 
-level0 = MIconversion_merge$level0
+level0 = MIconversion_merge$level0      #MICHIGAN!!
 level1 = MIconversion_merge$L1_tree
 level2 = MIconversion_merge$level2
 check = MIconversion_merge$check
@@ -1260,9 +1244,57 @@ comments = MIconversion_merge$comments
 conversiontable = data.frame(cbind(level0,level1, level2, check, level3a, count, domain, comments), stringsAsFactors = FALSE)
 colnames(conversiontable) = c("level0","level1","level2","check","level3a","count","domain","comments")
 
-write.csv(conversiontable, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/ILconversion2.0_7-30-19.csv", row.names = FALSE)
-write.csv(conversiontable, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/INconversion_v2.07-26-19.csv", row.names = FALSE)
+#update the domain for the new version
+#Indiana v1.8 goes to Indiana v2.0
+conversiontable$domain = "Indiana v2.0"
+
+#Illinois_v1.9 goes to Illinois 2.0"
+conversiontable$domain = "Illinois v2.0"
+
+#check the "NA" level0 entries. These are taxa that have been with this next version of additional data.
+View(conversiontable) #sort by level0 and just check the NA entries. These will need level0 and level2 updated in the csv
+
+#NOTE!! make sure that Wet level 0/1 trees are now listed as No tree for level3a. This was updated for version 0.9 of the conversion file.
+
+write.csv(conversiontable, file = "./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/QA_QC Output/ILconversion2.0_8-5-19.csv", row.names = FALSE)
+write.csv(conversiontable, file = "./Indiana/IN PLS for Modelers/IN PLS_v2.0/INconversion_v2.0_8-5-19.csv", row.names = FALSE)
 write.csv(conversiontable, file = "./MIconversion_v1.0_5-3-19.csv", row.names = FALSE)
+
+#once these conversion files are written here replace the IN and IL data
+#in the conversion file that goes on the wiki with these updated conversion and counts
+
+#check the conversions in the updated conversion file with the previous version to avoid issues like the Wet -> No tree issue that came up for version 2.0 in IL and IN.
+newconversion = read.csv("C:/Users/jmurray7/Dropbox/PalEON2/Conversion Tables - Allometry, PEcAn, PLS, FIA/conversion files uploaded to wiki/level0_to_level3a_v1.0 - Copy.csv",header = TRUE, stringsAsFactors = FALSE)
+oldconversion = read.csv("C:/Users/jmurray7/Dropbox/PalEON2/Conversion Tables - Allometry, PEcAn, PLS, FIA/conversion files uploaded to wiki/level0_to_level3a_v0.9.csv",header = TRUE, stringsAsFactors = FALSE)
+
+#select just IL and IN domain entries
+#Illinois
+newconversion2 = newconversion[which(newconversion$domain == "Illinois v2.0"),]
+oldconversion2 = oldconversion[which(oldconversion$domain == "Illinois_v1.9"),]
+
+#Indiana
+newconversion2 = newconversion[which(newconversion$domain == "Indiana v2.0"),]
+oldconversion2 = oldconversion[which(oldconversion$domain == "Indiana v1.8"),]
+
+#after selecting the IN or IL domains run this to concatenate the level0 and level3a entries in order to compare below
+newtaxa = paste0(newconversion2$level0,newconversion2$level3a)
+oldtaxa = paste0(oldconversion2$level0,oldconversion2$level3a)
+
+#find the new taxa and if there are any like the Wet, Water, No data, No tree that different from the previous conversion file
+old_in_new = oldtaxa %in% newtaxa #needs to all be true
+d = which(old_in_new == "FALSE") 
+d #see if there are any entries that get returned for d
+# now find the d entries in the oldconversion
+View(oldconversion2[d,])  #THIS WILL TELL YOU IF SOMETHING DID NOT CONVERT APPROPRIATELY FROM THE PREVIOUS VERSION
+
+new_in_old = newtaxa %in% oldtaxa
+y = which(new_in_old == "FALSE") 
+y #see if there are any entries that get returned for y
+# now find the y entries in the newconversion
+View(newconversion2[y,]) #THIS WILL TELL YOU WHAT NEW TAXA WERE ADDED
+
+
+#after running through this code for IL, go back up to the Indiana section and re-run for IN
 
 ########################################################################################
 ##### Histogram of Diameters for all Level 3a Taxa #####################################
@@ -1440,3 +1472,13 @@ hist(Walnut$diameter, breaks = 15)
 Willow = combined[combined$L3_tree == 'Willow',]
 Willow = Willow[which(Willow$diameter < 88888),]
 hist(Willow$diameter, breaks = 15)
+
+#compare column names of updated file
+INv2.0 = read.csv("./Indiana/IN PLS for Modelers/IN PLS_v2.0/ndinpls_v2.0.csv", header = TRUE, stringsAsFactors = FALSE)
+ILv2.0 = read.csv("./Illinois/IL PLS for Modelers/Illinois PLS_v2.0/ndilpls_v2.0.csv", header = TRUE, stringsAsFactors = FALSE)
+
+IN.header = colnames(INv2.0)
+IL.header = colnames(ILv2.0)
+IN.header == IL.header #needs to all say TRUE
+
+
